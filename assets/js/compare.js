@@ -74,7 +74,7 @@
   }
   function rowsFor(list) {
     var rows = [];
-    rows.push(row(t("cmp_image"), list, function (p) { return imgFor(p) || p.family; }, mediaHtml, true));
+    // 机型图片仅在 thead 头卡片展示，避免 tbody 重复造成视觉重叠
     rows.push(row(t("cmp_name"), list, function (p) { return p.name; }, function (p) { return productName(p.name); }));
     rows.push(row(t("cmp_family"), list, function (p) { return p.family; }, function (p) { return familyTag(p.family); }));
     rows.push(row(t("cmp_k3"), list, function (p) { return p.k3; }, function (p) { return "K3 " + p.k3; }));

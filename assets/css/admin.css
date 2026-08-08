@@ -1,0 +1,178 @@
+/* ===== 后台管理样式（清爽浅色 · 冷调） ===== */
+.admin-body {
+  margin: 0;
+  font-family: var(--font-body, "Noto Sans SC", system-ui, sans-serif);
+  background: #F6F8FB;
+  color: #15202E;
+  min-height: 100vh;
+}
+
+/* 登录 */
+.login-wrap {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(1200px 600px at 50% -10%, #eaf3fb 0%, #F6F8FB 60%);
+}
+.login-card {
+  width: 360px;
+  background: #fff;
+  border: 1px solid #e4eaf1;
+  border-radius: 20px;
+  padding: 36px 32px 32px;
+  box-shadow: 0 24px 60px rgba(21, 32, 46, .12);
+  display: flex;
+  flex-direction: column;
+}
+.login-logo {
+  width: 52px; height: 52px; margin: 0 auto 14px;
+  border-radius: 14px; display: grid; place-items: center;
+  font-family: var(--font-display, "Sora", sans-serif); font-weight: 800; font-size: 26px; color: #fff;
+  background: linear-gradient(135deg, #2F6FE0, #19B6C6);
+  box-shadow: 0 8px 20px rgba(47,111,224,.32);
+}
+.login-card h1 { font-family: var(--font-display, "Sora", sans-serif); font-size: 21px; text-align: center; margin: 2px 0 4px; }
+.login-sub { text-align: center; color: #8A97A8; font-size: 13px; margin: 0 0 20px; }
+.login-card label { font-size: 12px; color: #55627A; margin: 12px 0 5px; font-weight: 600; }
+.login-card input {
+  width: 100%; padding: 12px 13px; border: 1px solid #dde4ec; border-radius: 11px;
+  font-size: 14px; box-sizing: border-box; font-family: inherit; background: #FBFCFE; color: #15202E;
+  transition: border-color .18s, box-shadow .18s;
+}
+.login-card input:focus { outline: none; border-color: #2F6FE0; box-shadow: 0 0 0 3px rgba(47,111,224,.16); }
+.login-card .btn-primary { margin-top: 20px; }
+.login-err { color: #DC4A3D; font-size: 12.5px; min-height: 16px; margin-top: 10px; text-align: center; }
+
+/* 顶部栏 */
+.admin-app { max-width: 1080px; margin: 0 auto; padding: 24px; }
+.admin-top {
+  display: flex; align-items: center; justify-content: space-between;
+  background: #fff; border: 1px solid #e4eaf1; border-radius: 16px;
+  padding: 14px 20px; position: sticky; top: 16px; z-index: 20;
+  box-shadow: 0 8px 24px rgba(21,32,46,.06);
+}
+.admin-brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display, "Sora", sans-serif); font-weight: 700; font-size: 16px; }
+.admin-brand .mark {
+  width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center;
+  font-weight: 800; font-size: 15px; color: #fff;
+  background: linear-gradient(135deg, #2F6FE0, #19B6C6);
+}
+.admin-top-right { display: flex; align-items: center; gap: 10px; }
+.save-state { font-size: 12.5px; color: #1F9D6B; background: #e7f5ee; padding: 4px 10px; border-radius: 20px; }
+.save-state.dirty { color: #C97E2A; background: #fdf0e0; }
+
+.btn-primary {
+  background: linear-gradient(135deg, #2F6FE0, #19B6C6);
+  color: #fff; border: none; border-radius: 11px; padding: 10px 18px;
+  font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
+  box-shadow: 0 8px 20px rgba(47,111,224,.24);
+}
+.btn-primary:hover { filter: brightness(1.05); transform: translateY(-1px); }
+.btn-primary.sm { padding: 7px 14px; font-size: 13px; }
+.btn-ghost {
+  background: #fff; color: #55627A; border: 1px solid #dde4ec; border-radius: 11px;
+  padding: 9px 16px; font-size: 14px; cursor: pointer; font-family: inherit;
+  transition: .18s;
+}
+.btn-ghost:hover { background: #f3f8fd; border-color: #2F6FE0; color: #1B4FB0; }
+.btn-ghost.sm { padding: 5px 11px; font-size: 12.5px; }
+
+/* Tabs */
+.admin-tabs { display: flex; gap: 8px; margin: 18px 0; }
+.atab {
+  background: #fff; border: 1px solid #e4eaf1; border-radius: 11px;
+  padding: 9px 18px; font-size: 14px; cursor: pointer; font-family: inherit; color: #55627A;
+  transition: .2s;
+}
+.atab.active { background: #2F6FE0; color: #fff; border-color: #2F6FE0; }
+
+.atab-panel { display: none; }
+.atab-panel.active { display: block; animation: fade .3s; }
+@keyframes fade { from { opacity: 0; } }
+.panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 14px; }
+.panel-head h2 { font-family: var(--font-display, "Sora", sans-serif); font-size: 18px; margin: 0; }
+.hint { color: #8A97A8; font-size: 12.5px; margin: 4px 0 14px; }
+
+/* 库存表格 */
+.table-wrap { background: #fff; border: 1px solid #e4eaf1; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-sm, 0 6px 20px rgba(21,32,46,.06)); }
+.admin-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.admin-table th, .admin-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #eef2f6; }
+.admin-table th {
+  background: #F2F6FB; color: #55627A; font-weight: 600; font-size: 12.5px;
+  font-family: var(--font-display, "Sora", sans-serif); letter-spacing: .3px;
+}
+.admin-table tbody tr:last-child td { border-bottom: 0; }
+.admin-table tbody tr:hover td { background: #F3F8FD; }
+.stock-head-right { display: flex; align-items: center; gap: 12px; }
+.stock-updated-at { font-size: 12.5px; color: #55627A; font-weight: 600; }
+.stock-qty-input {
+  width: 92px; padding: 7px 10px; border: 1px solid #dde4ec; border-radius: 9px;
+  font-size: 14px; text-align: right; background: #FBFCFE; color: #15202E;
+  transition: border-color .18s, box-shadow .18s;
+}
+.stock-qty-input:focus { border-color: #2F6FE0; outline: none; box-shadow: 0 0 0 3px rgba(47,111,224,.16); }
+.tag-sold { color: #DC4A3D; font-size: 12px; background: #fbe3e3; padding: 2px 8px; border-radius: 10px; }
+.tag-on { color: #1F9D6B; font-size: 12px; background: #e7f5ee; padding: 2px 8px; border-radius: 10px; }
+.row-edit, .row-del { border: none; background: none; cursor: pointer; font-size: 13px; padding: 4px 8px; border-radius: 8px; }
+.row-edit { color: #2F6FE0; }
+.row-del { color: #DC4A3D; }
+.row-edit:hover, .row-del:hover { background: #f0f4f8; }
+
+/* 库存概览统计 */
+.stock-overview { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.ov-card {
+  background: #fff; border: 1px solid #e4eaf1; border-radius: 14px; padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 2px; box-shadow: 0 4px 14px rgba(21,32,46,.04);
+}
+.ov-num { font-family: var(--font-display, "Sora", sans-serif); font-size: 26px; font-weight: 800; color: #15202E; line-height: 1.1; }
+.ov-label { font-size: 12px; color: #8A97A8; }
+.ov-card.ok { border-top: 3px solid #1F9D6B; }
+.ov-card.ok .ov-num { color: #1F9D6B; }
+.ov-card.low { border-top: 3px solid #E08A2B; }
+.ov-card.low .ov-num { color: #C97E2A; }
+.ov-card.out { border-top: 3px solid #DC4A3D; }
+.ov-card.out .ov-num { color: #DC4A3D; }
+
+/* toast */
+.toast {
+  position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%);
+  background: #15202E; color: #fff; padding: 11px 20px; border-radius: 10px;
+  font-size: 13.5px; z-index: 60; box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  animation: toastin .3s ease;
+}
+@keyframes toastin { from { opacity: 0; transform: translate(-50%, 10px); } }
+
+/* 退货 / 补发管理 */
+.section-sub { font-family: var(--font-display, "Sora", sans-serif); font-size: 15px; font-weight: 700; margin: 22px 0 10px; color: #15202E; }
+.form-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;
+  background: #fff; border: 1px solid #e4eaf1; border-radius: 16px; padding: 16px; margin-bottom: 8px;
+  box-shadow: 0 6px 20px rgba(21,32,46,.06);
+}
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: 12px; color: #55627A; font-weight: 600; }
+.field input, .field select {
+  padding: 9px 11px; border: 1px solid #dde4ec; border-radius: 10px; font-size: 13.5px;
+  background: #FBFCFE; color: #15202E; font-family: inherit; transition: border-color .18s, box-shadow .18s;
+}
+.field input:focus, .field select:focus { outline: none; border-color: #2F6FE0; box-shadow: 0 0 0 3px rgba(47,111,224,.16); }
+.field.full { grid-column: 1 / -1; }
+.form-actions { grid-column: 1 / -1; display: flex; gap: 10px; justify-content: flex-end; }
+.filter-bar { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+.filter-bar label { font-size: 12.5px; color: #55627A; font-weight: 600; }
+.filter-bar select {
+  padding: 7px 10px; border: 1px solid #dde4ec; border-radius: 9px; font-size: 13px; background: #fff; color: #15202E; font-family: inherit;
+}
+.filter-bar select:focus { outline: none; border-color: #2F6FE0; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+.st-tag { font-size: 12px; padding: 2px 9px; border-radius: 10px; font-weight: 600; white-space: nowrap; }
+.st-pending { color: #C97E2A; background: #fdf0e0; }
+.st-shipped { color: #2F6FE0; background: #e8f0fd; }
+.st-received { color: #1F9D6B; background: #e7f5ee; }
+
+@media (max-width: 640px) {
+  .admin-top { flex-direction: column; gap: 10px; align-items: stretch; }
+  .admin-top-right { justify-content: space-between; }
+  .table-wrap { overflow-x: auto; }
+  .stock-overview { grid-template-columns: repeat(2, 1fr); }
+}

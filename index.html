@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Noto+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/style.css?v=20260804" />
+  <link rel="stylesheet" href="assets/css/style.css?v=20260808" />
 </head>
 <body>
   <!-- progress bar -->
@@ -149,6 +149,19 @@
     </div>
   </footer>
 
+  <!-- 机型对比浮动栏 -->
+  <div class="compare-bar" id="compareBar" hidden>
+    <div class="compare-bar-inner">
+      <div class="cb-toast" id="cbToast" hidden></div>
+      <div class="cb-info"><b id="cbCount">0</b> <span data-i18n="compare_bar">机型对比</span></div>
+      <div class="cb-chips" id="cbChips"></div>
+      <div class="cb-actions">
+        <button class="btn btn-ghost sm" id="cbClear" type="button" data-i18n="compare_clear">清空</button>
+        <a class="btn btn-primary sm" id="cbGo" href="compare.html" data-i18n="compare_go">去对比</a>
+      </div>
+    </div>
+  </div>
+
   <!-- 机型详情已迁至 product-detail.html（点击产品卡片跳转） -->
 
   <!-- 登录墙（加密数据需密码解密；默认隐藏，仅在加密模式下由 app.js 显示） -->
@@ -167,8 +180,8 @@
     </form>
   </div>
 
-  <script src="assets/js/data.js?v=20260804"></script>
-  <script src="assets/js/i18n.js?v=20260804"></script>
-  <script src="assets/js/app.js?v=20260804"></script>
+  <script src="assets/js/data.js?v=20260808"></script>
+  <script src="assets/js/i18n.js?v=20260808"></script>
+  <script src="assets/js/app.js?v=20260808"></script>
 </body>
 </html>

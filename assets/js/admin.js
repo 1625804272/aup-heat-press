@@ -1,3 +1,8 @@
+/* admin.js —— GitHub Pages 版后台（无 Functions，数据同步到仓库）
+ * 登录：填入 GitHub Token（经典令牌，含 repo 权限）→ 验证 → 存 sessionStorage
+ * 数据：库存/台账读写仓库内 assets/data/stock.json、assets/data/returns.json
+ * 保存即一次 git commit，访客刷新后可见（约数秒 CDN 生效）
+ */
 (function () {
   "use strict";
   const $ = (s, p = document) => p.querySelector(s);
@@ -11,60 +16,95 @@
   let toastTimer;
   function toast(msg) {
     const t = $("#toast");
+    if (!t) return;
     t.textContent = msg;
     t.hidden = false;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => (t.hidden = true), 2200);
+    toastTimer = setTimeout(() => (t.hidden = true), 2400);
   }
-  async function api(path, opts) {
-    const r = await fetch(path, Object.assign({ credentials: "same-origin" }, opts));
-    const j = await r.json().catch(() => ({}));
-    return { r, j };
-  }
+
+  const STOCK_PATH = "assets/data/stock.json";
+  const RETURNS_PATH = "assets/data/returns.json";
+
+  // 库存种子（仓库文件不存在时启用，保证后台有可编辑的 SKU 行）
+  const DEFAULT_STOCK = {
+    updatedAt: null,
+    items: [
+      { family: "AUP-M2", color: "红色", plug: "欧插", qty: 0 },
+      { family: "AUP-M2", color: "绿色", plug: "欧插", qty: 0 },
+      { family: "AUP-L", color: "红色", plug: "中插", qty: 0 },
+      { family: "AUP-L", color: "红色", plug: "欧插", qty: 0 },
+      { family: "AUP-L", color: "绿色", plug: "中插", qty: 0 },
+      { family: "AUP-L", color: "绿色", plug: "欧插", qty: 0 },
+      { family: "AUP-L2", color: "紫色", plug: "中插", qty: 0 },
+      { family: "AUP-L3", color: "绿色", plug: "中插", qty: 0 },
+      { family: "AUP-L3", color: "绿色", plug: "欧插", qty: 0 }
+    ]
+  };
+
+  const FAMILIES = ["AUP-M2", "AUP-L", "AUP-L2", "AUP-L3"];
+
+  // 状态
+  let stock = { items: [], updatedAt: null };
+  let stockLoaded = false;
+  let stockSha = null;
+  let returnsData = { returns: [], reships: [] };
+  let returnsLoaded = false;
+  let returnsSha = null;
+  let returnFilter = { family: "全部", voltage: "全部" };
+  let reshipFilter = { family: "全部", voltage: "全部" };
 
   /* ---------- 登录 ---------- */
   $("#loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const user = $("#loginUser").value.trim();
-    const pass = $("#loginPass").value;
-    const { r, j } = await api("/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user, pass }),
-    });
-    if (r.ok && j.ok) await enterAdmin();
-    else $("#loginErr").textContent = j.error || "登录失败";
+    const tok = $("#loginToken").value.trim();
+    if (!tok) {
+      $("#loginErr").textContent = "请填入 GitHub Token（经典令牌，勾选 repo 权限）";
+      return;
+    }
+    $("#loginErr").textContent = "正在验证 Token…";
+    const v = await GHStore.verify(tok);
+    if (!v.ok) {
+      $("#loginErr").textContent = "Token 无效或无权限（HTTP " + v.status + "）";
+      return;
+    }
+    GHStore.setToken(tok);
+    showGhStatus(v.login);
+    await enterAdmin();
   });
 
+  function showGhStatus(login) {
+    const el = $("#ghStatus");
+    if (el) el.textContent = "● 已连接 GitHub · @" + (login || "?");
+  }
+
   async function enterAdmin() {
-    // 以库存接口鉴权；未登录返回 401 时退回登录页
-    const { r, j } = await api("/api/admin/stock");
-    if (!r.ok) {
+    const tok = GHStore.token();
+    if (!tok) {
       $("#loginView").hidden = false;
       $("#appView").hidden = true;
       return;
     }
-    // 先显示后台框架，再渲染库存——避免渲染异常导致整页卡在登录页
+    // 先显示后台框架，再加载数据，避免异常导致卡在登录页
     $("#loginView").hidden = true;
     $("#appView").hidden = false;
     try {
-      if (j && Array.isArray(j.items)) {
-        stock = j;
-        stockLoaded = true;
-        renderStockAdmin();
-      } else {
-        toast("库存数据格式异常");
-      }
-    // 后台框架已显示，后台台账也一并加载（不影响库存渲染）
-    loadReturnsAdmin();
+      await loadStockAdmin();
     } catch (e) {
-      console.error("[renderStockAdmin]", e);
+      console.error("[loadStockAdmin]", e);
       toast("库存加载失败：" + (e && e.message ? e.message : e));
+    }
+    try {
+      await loadReturnsAdmin();
+    } catch (e) {
+      console.error("[loadReturnsAdmin]", e);
+      toast("退货加载失败：" + (e && e.message ? e.message : e));
     }
   }
 
   $("#logoutBtn").addEventListener("click", () => {
-    fetch("/api/logout", { method: "POST", credentials: "same-origin" }).then(() => location.reload());
+    GHStore.setToken("");
+    location.reload();
   });
 
   /* ---------- Tabs ---------- */
@@ -75,27 +115,26 @@
       const t = b.dataset.tab;
       $$(".atab-panel").forEach((p) => p.classList.remove("active"));
       $("#tab-" + t).classList.add("active");
-      if (t === "stock" && !stockLoaded) loadStockAdmin();
-      if (t === "returns" && !returnsLoaded) loadReturnsAdmin();
     })
   );
 
   /* ---------- 库存管理 ---------- */
-  let stock = { items: [], updatedAt: null };
-  let stockLoaded = false;
-
   async function loadStockAdmin() {
-    const { r, j } = await api("/api/admin/stock");
-    if (r.ok && j && Array.isArray(j.items)) {
-      stock = j;
-      stockLoaded = true;
-      renderStockAdmin();
-    } else if (r.status === 401) {
-      // 未登录态由 enterAdmin 统一处理
+    const res = await GHStore.read(STOCK_PATH);
+    if (res.notFound) {
+      stock = JSON.parse(JSON.stringify(DEFAULT_STOCK));
+      stockSha = null;
+    } else if (res.error) {
+      toast("库存读取失败：" + res.error);
+      return;
     } else {
-      toast("库存加载失败：" + (j.error || r.status));
+      stock = res.content && Array.isArray(res.content.items) ? res.content : JSON.parse(JSON.stringify(DEFAULT_STOCK));
+      stockSha = res.sha;
     }
+    stockLoaded = true;
+    renderStockAdmin();
   }
+
   function renderStockAdmin() {
     const tb = $("#stockTable tbody");
     const items = stock.items || [];
@@ -129,6 +168,7 @@
       ? "最近更新：" + u.toLocaleString("zh-CN", { hour12: false })
       : "尚未更新";
   }
+
   function renderStockOverview(items) {
     const ov = $("#stockOverview");
     if (!ov) return;
@@ -144,28 +184,23 @@
       '<div class="ov-card low"><span class="ov-num">' + low + '</span><span class="ov-label">库存紧张</span></div>' +
       '<div class="ov-card out"><span class="ov-num">' + out + '</span><span class="ov-label">缺货</span></div>';
   }
+
   $("#saveStockBtn").addEventListener("click", async () => {
-    const { r, j } = await api("/api/admin/stock", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(stock),
-    });
-    if (r.ok && j.ok) {
-      stock.updatedAt = j.savedAt;
-      $("#stockUpdatedAt").textContent = "最近更新：" + new Date(j.savedAt).toLocaleString("zh-CN", { hour12: false });
-      toast("库存已保存 ✓");
+    const btn = $("#saveStockBtn");
+    btn.disabled = true;
+    stock.updatedAt = new Date().toISOString();
+    const res = await GHStore.write(STOCK_PATH, stock, stockSha, "更新实时库存（后台）");
+    btn.disabled = false;
+    if (res.ok) {
+      stockSha = res.sha || stockSha;
+      $("#stockUpdatedAt").textContent = "最近更新：" + new Date(stock.updatedAt).toLocaleString("zh-CN", { hour12: false });
+      toast("库存已保存并提交到 GitHub ✓（访客稍后可见）");
     } else {
-      toast("库存保存失败：" + (j.error || r.status));
+      toast("库存保存失败：" + (res.error || res.status));
     }
   });
 
   /* ---------- 退货 / 补发管理（独立台账，不影响库存） ---------- */
-  const FAMILIES = ["AUP-M2", "AUP-L", "AUP-L2", "AUP-L3"];
-  let returnsData = { returns: [], reships: [] };
-  let returnsLoaded = false;
-  let returnFilter = { family: "全部", voltage: "全部" };
-  let reshipFilter = { family: "全部", voltage: "全部" };
-
   function genId(p) {
     return p + "_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   }
@@ -175,19 +210,68 @@
   }
 
   async function loadReturnsAdmin() {
-    const { r, j } = await api("/api/admin/returns");
-    if (r.ok && j) {
-      returnsData = {
-        returns: Array.isArray(j.returns) ? j.returns : [],
-        reships: Array.isArray(j.reships) ? j.reships : [],
-      };
-      returnsLoaded = true;
-      renderReturns();
-    } else if (r.status === 401) {
-      // 未登录态由 enterAdmin 统一处理
+    const res = await GHStore.read(RETURNS_PATH);
+    if (res.notFound) {
+      returnsData = { returns: [], reships: [] };
+      returnsSha = null;
+    } else if (res.error) {
+      toast("退货读取失败：" + res.error);
+      return;
     } else {
-      toast("退货数据加载失败：" + (j.error || r.status));
+      returnsData = {
+        returns: Array.isArray(res.content.returns) ? res.content.returns : [],
+        reships: Array.isArray(res.content.reships) ? res.content.reships : []
+      };
+      returnsSha = res.sha;
     }
+    returnsLoaded = true;
+    renderReturns();
+  }
+
+  // 客户端聚合（与 Netlify /api/returns 输出格式一致，供公开页渲染）
+  function summarize(d) {
+    const returns = d.returns || [];
+    const reships = d.reships || [];
+    let totalReturns = 0, pendingReship = 0, shipped = 0, received = 0, recentReturns = 0;
+    const since7 = Date.now() - 7 * 24 * 3600 * 1000;
+    returns.forEach((r) => {
+      const q = Number(r.qty) || 0;
+      totalReturns += q;
+      const tt = r.date ? new Date(r.date).getTime() : NaN;
+      if (!isNaN(tt) && tt >= since7) recentReturns += q;
+    });
+    reships.forEach((s) => {
+      const q = Number(s.qty) || 0;
+      const st = s.status || "";
+      if (st === "待补发") pendingReship += q;
+      else if (st === "已补发") shipped += q;
+      else if (st === "已收货") received += q;
+    });
+    const map = {};
+    const add = (f) => { if (!map[f]) map[f] = { family: f, returned: 0, reshiped: 0, pending: 0 }; return map[f]; };
+    returns.forEach((r) => { if (r.family) add(r.family).returned += Number(r.qty) || 0; });
+    reships.forEach((s) => {
+      if (!s.family) return;
+      const m = add(s.family);
+      const q = Number(s.qty) || 0;
+      const st = s.status || "";
+      if (st === "待补发") m.pending += q; else m.reshiped += q;
+    });
+    const byModel = FAMILIES.filter((f) => map[f]).map((f) => map[f]);
+    const returnsLite = returns.map((r) => ({
+      family: r.family || "", color: r.color || "", plug: r.plug || "",
+      voltage: r.voltage || "", qty: Number(r.qty) || 0, date: r.date || "", source: r.source || ""
+    }));
+    const reshipsLite = reships.map((s) => ({
+      family: s.family || "", color: s.color || "", plug: s.plug || "",
+      voltage: s.voltage || "", qty: Number(s.qty) || 0, shipDate: s.shipDate || "",
+      supplier: s.supplier || "", status: s.status || ""
+    }));
+    return {
+      updatedAt: d.updatedAt || null,
+      overview: { totalReturns, pendingReship, shipped, received, recentReturns },
+      byModel, returns: returnsLite, reships: reshipsLite
+    };
   }
 
   function renderReturns() {
@@ -324,17 +408,14 @@
 
   async function saveReturns(msg) {
     returnsData.updatedAt = new Date().toISOString();
-    const { r, j } = await api("/api/admin/returns", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(returnsData),
-    });
-    if (r.ok && j.ok) {
-      returnsData.updatedAt = j.savedAt;
+    const payload = summarize(returnsData);
+    const res = await GHStore.write(RETURNS_PATH, payload, returnsSha, "更新退货台账（后台）");
+    if (res.ok) {
+      returnsSha = res.sha || returnsSha;
       renderReturns();
-      if (msg) toast(msg);
+      if (msg) toast(msg + " · 已提交到 GitHub ✓");
     } else {
-      toast("保存失败：" + (j.error || r.status));
+      toast("保存失败：" + (res.error || res.status));
     }
   }
 
@@ -399,8 +480,14 @@
   $("#reshipFilterFamily").addEventListener("change", (e) => { reshipFilter.family = e.target.value; renderReshipTable(); });
   $("#reshipFilterVoltage").addEventListener("change", (e) => { reshipFilter.voltage = e.target.value; renderReshipTable(); });
 
-  /* ---------- 初始化：尝试已有会话 ---------- */
+  /* ---------- 初始化：若有会话直接进后台 ---------- */
   (async () => {
-    await enterAdmin();
+    if (GHStore.token()) {
+      const v = await GHStore.verify(GHStore.token());
+      if (v.ok) { showGhStatus(v.login); await enterAdmin(); return; }
+      GHStore.setToken("");
+    }
+    $("#loginView").hidden = false;
+    $("#appView").hidden = true;
   })();
 })();

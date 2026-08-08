@@ -1,0 +1,14 @@
+{
+  "updatedAt": null,
+  "items": [
+    { "family": "AUP-M2", "color": "红色", "plug": "欧插", "qty": 0 },
+    { "family": "AUP-M2", "color": "绿色", "plug": "欧插", "qty": 0 },
+    { "family": "AUP-L", "color": "红色", "plug": "中插", "qty": 0 },
+    { "family": "AUP-L", "color": "红色", "plug": "欧插", "qty": 0 },
+    { "family": "AUP-L", "color": "绿色", "plug": "中插", "qty": 0 },
+    { "family": "AUP-L", "color": "绿色", "plug": "欧插", "qty": 0 },
+    { "family": "AUP-L2", "color": "紫色", "plug": "中插", "qty": 0 },
+    { "family": "AUP-L3", "color": "绿色", "plug": "中插", "qty": 0 },
+    { "family": "AUP-L3", "color": "绿色", "plug": "欧插", "qty": 0 }
+  ]
+}

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>熨斗产品 · 后台管理</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="assets/css/admin.css?v=20260808c" />
+</head>
+<body class="admin-body">
+  <!-- 登录视图 -->
+  <div id="loginView" class="login-wrap">
+    <form id="loginForm" class="login-card">
+      <div class="login-logo">A</div>
+      <h1>熨斗产品后台</h1>
+      <p class="login-sub">登录后可维护实时库存</p>
+      <label>账号</label>
+      <input type="text" id="loginUser" autocomplete="username" placeholder="admin" />
+      <label>密码（可选）</label>
+      <input type="password" id="loginPass" autocomplete="current-password" placeholder="站点密码，可留空" />
+      <label>GitHub Token *</label>
+      <input type="password" id="loginToken" autocomplete="off" placeholder="ghp_... 或 github_pat_..." />
+      <p class="login-hint">GitHub 版后台以 Token 鉴权：用含 <b>repo</b> 权限的经典令牌（github.com/settings/tokens 生成）。Token 仅存于本次会话，保存即提交到仓库，访客稍后可见。</p>
+      <button type="submit" class="btn-primary">登 录</button>
+      <div id="loginErr" class="login-err"></div>
+    </form>
+  </div>
+
+  <!-- 管理视图 -->
+  <div id="appView" class="admin-app" hidden>
+    <header class="admin-top">
+      <div class="admin-brand"><span class="mark">A</span> 熨斗产品 · 后台管理</div>
+      <div class="admin-top-right">
+        <span id="ghStatus" class="gh-status">未连接 GitHub</span>
+        <button id="logoutBtn" class="btn-ghost">退出</button>
+      </div>
+    </header>
+
+    <nav class="admin-tabs">
+      <button class="atab active" data-tab="stock">库存管理</button>
+      <button class="atab" data-tab="returns">退货管理</button>
+    </nav>
+
+    <main class="admin-main">
+      <!-- 库存管理 -->
+      <section class="atab-panel active" id="tab-stock">
+        <div class="panel-head">
+          <h2>库存管理</h2>
+          <div class="stock-head-right">
+            <span id="stockUpdatedAt" class="stock-updated-at">尚未更新</span>
+            <button id="saveStockBtn" class="btn-primary sm">保存库存</button>
+          </div>
+        </div>
+        <p class="hint">常备库存实时维护。修改数量后点「保存库存」写入；下方显示最近更新时间。</p>
+        <div class="stock-overview" id="stockOverview"></div>
+        <div class="table-wrap">
+          <table class="admin-table" id="stockTable">
+            <thead>
+              <tr><th>系列</th><th>颜色</th><th>插头</th><th>库存数量（台）</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 退货 / 补发管理 -->
+      <section class="atab-panel" id="tab-returns">
+        <div class="panel-head">
+          <h2>退货管理</h2>
+          <div class="stock-head-right">
+            <span id="returnsUpdatedAt" class="stock-updated-at">尚未更新</span>
+          </div>
+        </div>
+        <p class="hint">退货与供应商补发为独立台账，不影响实时库存。可统计各型号 / 颜色 / 插头 / 电压的退货与补发情况。</p>
+
+        <!-- 概览统计 -->
+        <div class="stock-overview" id="returnsOverview"></div>
+
+        <!-- 按型号汇总 -->
+        <h3 class="section-sub">按型号汇总</h3>
+        <div class="table-wrap">
+          <table class="admin-table" id="returnsByModel">
+            <thead>
+              <tr><th>型号</th><th>退货台数</th><th>已补发台数</th><th>待补发台数</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <!-- 退货登记 -->
+        <h3 class="section-sub">退货登记</h3>
+        <form class="form-grid" id="returnForm">
+          <div class="field">
+            <label>型号 *</label>
+            <select name="family" required>
+              <option value="AUP-M2">AUP-M2</option>
+              <option value="AUP-L">AUP-L</option>
+              <option value="AUP-L2">AUP-L2</option>
+              <option value="AUP-L3">AUP-L3</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>颜色</label>
+            <input name="color" list="colorList" placeholder="如 红色" />
+          </div>
+          <div class="field">
+            <label>插头规格</label>
+            <input name="plug" list="plugList" placeholder="如 欧插" />
+          </div>
+          <div class="field">
+            <label>电压</label>
+            <select name="voltage">
+              <option value="110V">110V</option>
+              <option value="220V">220V</option>
+              <option value="110/220V">110V &amp; 220V</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>数量（台）*</label>
+            <input name="qty" type="number" min="1" step="1" value="1" />
+          </div>
+          <div class="field">
+            <label>退货日期</label>
+            <input name="date" type="date" />
+          </div>
+          <div class="field">
+            <label>退货来源 / 客户</label>
+            <input name="source" placeholder="如 渠道名 / 客户" />
+          </div>
+          <div class="field">
+            <label>退货原因</label>
+            <input name="reason" placeholder="如 质量问题" />
+          </div>
+          <div class="field full">
+            <label>备注</label>
+            <input name="note" placeholder="可选" />
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary sm">添加退货记录</button>
+          </div>
+        </form>
+
+        <!-- 退货记录 -->
+        <h3 class="section-sub">退货记录</h3>
+        <div class="filter-bar">
+          <label>型号</label>
+          <select id="returnFilterFamily">
+            <option value="全部">全部</option>
+            <option value="AUP-M2">AUP-M2</option>
+            <option value="AUP-L">AUP-L</option>
+            <option value="AUP-L2">AUP-L2</option>
+            <option value="AUP-L3">AUP-L3</option>
+          </select>
+          <label>电压</label>
+          <select id="returnFilterVoltage">
+            <option value="全部">全部</option>
+            <option value="110V">110V</option>
+            <option value="220V">220V</option>
+            <option value="110/220V">110V &amp; 220V</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table class="admin-table" id="returnTable">
+            <thead>
+              <tr><th>型号</th><th>颜色</th><th>插头</th><th>电压</th><th>数量</th><th>退货日期</th><th>来源</th><th>原因</th><th>操作</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <!-- 供应商补发 -->
+        <h3 class="section-sub">供应商补发登记</h3>
+        <form class="form-grid" id="reshipForm">
+          <div class="field">
+            <label>关联退货（可选）</label>
+            <select name="returnId" id="returnLinkSelect">
+              <option value="">不关联</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>型号 *</label>
+            <select name="family" required>
+              <option value="AUP-M2">AUP-M2</option>
+              <option value="AUP-L">AUP-L</option>
+              <option value="AUP-L2">AUP-L2</option>
+              <option value="AUP-L3">AUP-L3</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>颜色</label>
+            <input name="color" list="colorList" placeholder="如 红色" />
+          </div>
+          <div class="field">
+            <label>插头规格</label>
+            <input name="plug" list="plugList" placeholder="如 欧插" />
+          </div>
+          <div class="field">
+            <label>电压</label>
+            <select name="voltage">
+              <option value="110V">110V</option>
+              <option value="220V">220V</option>
+              <option value="110/220V">110V &amp; 220V</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>数量（台）*</label>
+            <input name="qty" type="number" min="1" step="1" value="1" />
+          </div>
+          <div class="field">
+            <label>补发日期</label>
+            <input name="shipDate" type="date" />
+          </div>
+          <div class="field">
+            <label>供应商</label>
+            <input name="supplier" placeholder="供应商名称" />
+          </div>
+          <div class="field">
+            <label>物流单号</label>
+            <input name="tracking" placeholder="可选" />
+          </div>
+          <div class="field">
+            <label>状态</label>
+            <select name="status">
+              <option value="待补发">待补发</option>
+              <option value="已补发">已补发</option>
+              <option value="已收货">已收货</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label>备注</label>
+            <input name="note" placeholder="可选" />
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary sm">添加补发记录</button>
+          </div>
+        </form>
+
+        <!-- 补发记录 -->
+        <h3 class="section-sub">供应商补发记录</h3>
+        <div class="filter-bar">
+          <label>型号</label>
+          <select id="reshipFilterFamily">
+            <option value="全部">全部</option>
+            <option value="AUP-M2">AUP-M2</option>
+            <option value="AUP-L">AUP-L</option>
+            <option value="AUP-L2">AUP-L2</option>
+            <option value="AUP-L3">AUP-L3</option>
+          </select>
+          <label>电压</label>
+          <select id="reshipFilterVoltage">
+            <option value="全部">全部</option>
+            <option value="110V">110V</option>
+            <option value="220V">220V</option>
+            <option value="110/220V">110V &amp; 220V</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table class="admin-table" id="reshipTable">
+            <thead>
+              <tr><th>型号</th><th>颜色</th><th>插头</th><th>电压</th><th>数量</th><th>补发日期</th><th>供应商</th><th>物流单号</th><th>状态</th><th>操作</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <!-- 公共 datalist -->
+        <datalist id="colorList">
+          <option value="红色"></option><option value="绿色"></option><option value="紫色"></option>
+          <option value="蓝色"></option><option value="黑色"></option><option value="白色"></option><option value="粉色"></option>
+        </datalist>
+        <datalist id="plugList">
+          <option value="中插"></option><option value="欧插"></option><option value="美插"></option>
+          <option value="英插"></option><option value="澳插"></option><option value="南非插"></option>
+        </datalist>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="assets/js/github-store.js?v=20260808c"></script>
+  <script src="assets/js/admin.js?v=20260808c"></script>
+</body>
+</html>

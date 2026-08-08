@@ -32,6 +32,16 @@
 
   var FAMILY_ORDER = ["AUP-M2", "AUP-L", "AUP-L2", "AUP-L3"];
 
+  /* ===== 机型对比状态 ===== */
+  var COMPARE_MAX = 4;
+  function loadCompare() {
+    try { return JSON.parse(localStorage.getItem("aup_compare") || "[]"); } catch (e) { return []; }
+  }
+  function saveCompare() {
+    try { localStorage.setItem("aup_compare", JSON.stringify(compareList)); } catch (e) {}
+  }
+  var compareList = loadCompare();
+
   /* ===== 工具 ===== */
   function yuan(n) { return "¥" + Number(n).toLocaleString("zh-CN"); }
   var COLOR_HEX = {
@@ -182,6 +192,10 @@
             '<div><div class="price-label">' + t("cat_price_label") + '</div><div class="price-val">' + yuan(p.basePrice) + '<small> /' + t("unit") + '</small></div></div>' +
             (hasSpecial ? '<span class="disc-tag">' + t("cat_special") + '</span>' : '<span class="chip">' + t("cat_standard") + '</span>') +
           '</div>' +
+          '<label class="cmp-check' + (compareList.indexOf(p.k3) >= 0 ? " checked" : "") + '">' +
+            '<input type="checkbox" data-cmp="' + p.k3 + '"' + (compareList.indexOf(p.k3) >= 0 ? " checked" : "") + '>' +
+            '<span class="cmp-check-text">' + (compareList.indexOf(p.k3) >= 0 ? t("compare_added") : t("compare_add")) + '</span>' +
+          '</label>' +
         '</div>' +
       '</article>';
     }).join("");
@@ -524,6 +538,12 @@
       if (cat) cat.scrollIntoView({ behavior: "smooth" });
     });
     $("#catalogGrid").addEventListener("click", function (e) {
+      var chk = e.target.closest(".cmp-check");
+      if (chk) {
+        var cb = chk.querySelector('input[type="checkbox"]');
+        toggleCompare(cb.getAttribute("data-cmp"), cb.checked, chk);
+        return;
+      }
       var c = e.target.closest(".product-card"); if (!c) return;
       location.href = "product-detail.html?k3=" + encodeURIComponent(c.getAttribute("data-k3"));
     });
@@ -552,6 +572,14 @@
     });
     var stockRefreshBtn = $("#stockRefresh"); if (stockRefreshBtn) stockRefreshBtn.addEventListener("click", loadStock);
     var returnsRefreshBtn = $("#returnsRefresh"); if (returnsRefreshBtn) returnsRefreshBtn.addEventListener("click", loadReturns);
+    var cbChips = $("#cbChips");
+    if (cbChips) cbChips.addEventListener("click", function (e) {
+      var x = e.target.closest(".cb-chip-x"); if (!x) return;
+      removeCompare(x.getAttribute("data-cmp"));
+    });
+    var cbClear = $("#cbClear"); if (cbClear) cbClear.addEventListener("click", function () {
+      compareList = []; saveCompare(); renderCompareBar(); renderCatalog();
+    });
     /* 机型详情弹窗已移除，点击产品卡片跳转 product-detail.html；报价计算器已迁至 calc.html */
   }
 
@@ -566,6 +594,60 @@
     applyI18n();
     $$(".section-head").forEach(function (el) { el.classList.add("reveal"); });
     observeReveal();
+    renderCompareBar();
+  }
+
+  /* ===== 机型对比：状态管理 ===== */
+  function toggleCompare(k3, checked, labelEl) {
+    var idx = compareList.indexOf(k3);
+    if (checked) {
+      if (compareList.length >= COMPARE_MAX && idx < 0) {
+        if (labelEl) labelEl.querySelector('input[type="checkbox"]').checked = false;
+        showCmpToast(t("compare_max"));
+        return;
+      }
+      if (idx < 0) compareList.push(k3);
+    } else if (idx >= 0) {
+      compareList.splice(idx, 1);
+    }
+    saveCompare();
+    renderCompareBar();
+    if (labelEl) {
+      var on = compareList.indexOf(k3) >= 0;
+      labelEl.classList.toggle("checked", on);
+      var span = labelEl.querySelector(".cmp-check-text");
+      if (span) span.textContent = on ? t("compare_added") : t("compare_add");
+    }
+  }
+  function removeCompare(k3) {
+    var i = compareList.indexOf(k3);
+    if (i >= 0) compareList.splice(i, 1);
+    saveCompare();
+    renderCompareBar();
+    renderCatalog();
+  }
+  function renderCompareBar() {
+    var bar = $("#compareBar"), chips = $("#cbChips"), count = $("#cbCount"), go = $("#cbGo");
+    if (!bar) return;
+    if (!compareList.length) { bar.hidden = true; return; }
+    bar.hidden = false;
+    count.textContent = compareList.length;
+    chips.innerHTML = compareList.map(function (k3) {
+      var p = (D.products || []).find(function (x) { return x.k3 === k3; });
+      var name = p ? productName(p.name) : k3;
+      return '<span class="cb-chip">' + name + '<button type="button" class="cb-chip-x" data-cmp="' + k3 + '" title="' + t("compare_remove") + '">✕</button></span>';
+    }).join("");
+    go.setAttribute("href", "compare.html?k3=" + encodeURIComponent(compareList.join(",")));
+  }
+  var cmpToastTimer = null;
+  function showCmpToast(msg) {
+    var bar = $("#compareBar"), toast = $("#cbToast");
+    if (!bar || !toast) return;
+    bar.hidden = false;
+    toast.textContent = msg;
+    toast.hidden = false;
+    clearTimeout(cmpToastTimer);
+    cmpToastTimer = setTimeout(function () { toast.hidden = true; }, 2200);
   }
 
   function boot(data) {

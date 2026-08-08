@@ -339,6 +339,15 @@
       if (!r.ok) throw new Error("接口不可用");
       renderStock(await r.json());
     } catch (e) {
+      // 静态回退：GitHub Pages 等无 Functions 环境读取打包的库存快照
+      try {
+        var rs = await fetch("assets/data/stock.json", { cache: "no-store" });
+        if (rs.ok) {
+          renderStock(await rs.json());
+          $("#stockUpdated").textContent = t("stock_updated_prefix") + t("static_snapshot");
+          return;
+        }
+      } catch (_) {}
       grid.innerHTML = '<p class="stock-empty">' + t("stock_unavailable") + '</p>';
       $("#stockUpdated").textContent = t("stock_updated_prefix") + "—";
     }
@@ -447,6 +456,15 @@
       if (!r.ok) throw new Error("接口不可用");
       renderReturns(await r.json());
     } catch (e) {
+      // 静态回退：GitHub Pages 等无 Functions 环境读取打包的台账快照
+      try {
+        var rr = await fetch("assets/data/returns.json", { cache: "no-store" });
+        if (rr.ok) {
+          renderReturns(await rr.json());
+          $("#returnsUpdated").textContent = t("stock_updated_prefix") + t("static_snapshot");
+          return;
+        }
+      } catch (_) {}
       ov.innerHTML = '<p class="stock-empty">' + t("returns_empty_msg") + '</p>';
       $("#returnsUpdated").textContent = t("stock_updated_prefix") + "—";
     }

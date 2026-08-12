@@ -179,3 +179,11 @@
   .table-wrap { overflow-x: auto; }
   .stock-overview { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ===== 只读模式（访问密码进入，仅查看） ===== */
+body.readonly .edit-only { display: none !important; }
+body.readonly .row-del { display: none !important; }
+body.readonly .stock-qty-input { display: none !important; }
+/* 隐藏「操作」列（删除按钮所在列）表头 */
+body.readonly #returnTable th:last-child,
+body.readonly #reshipTable th:last-child { display: none; }

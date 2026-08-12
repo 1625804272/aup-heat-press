@@ -1,7 +1,7 @@
-/* admin.js —— GitHub Pages 版后台（只读查看）
- * 登录：访问密码（auplex2026）进入，仅查看，不修改
- * 数据：直接读取仓库内静态文件 assets/data/stock.json、assets/data/returns.json
- * 无需 GitHub Token / API，适合给同事或自己随时查看退货台账
+/* admin.js —— GitHub Pages 版后台（无 Functions，数据同步到仓库）
+ * 登录：填入 GitHub Token（经典令牌，含 repo 权限）→ 验证 → 存 sessionStorage
+ * 数据：库存/台账读写仓库内 assets/data/stock.json、assets/data/returns.json
+ * 保存即一次 git commit，访客刷新后可见（约数秒 CDN 生效）
  */
 (function () {
   "use strict";
@@ -54,43 +54,56 @@
   let returnFilter = { family: "全部", voltage: "全部" };
   let reshipFilter = { family: "全部", voltage: "全部" };
 
-  /* ---------- 登录（访问密码，只读查看） ---------- */
-  const ACCESS_PASS = "auplex2026";
-
-  $("#loginForm").addEventListener("submit", (e) => {
+  /* ---------- 登录 ---------- */
+  $("#loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const pass = $("#loginPass").value;
-    if (pass !== ACCESS_PASS) {
-      $("#loginErr").textContent = "访问密码错误";
+    const tok = $("#loginToken").value.trim();
+    if (!tok) {
+      $("#loginErr").textContent = "请填入 GitHub Token（经典令牌，勾选 repo 权限）";
       return;
     }
-    try { sessionStorage.setItem("aup_view_ok", "1"); } catch (e) {}
-    enterAdmin();
+    $("#loginErr").textContent = "正在验证 Token…";
+    const v = await GHStore.verify(tok);
+    if (!v.ok) {
+      $("#loginErr").textContent = "Token 无效或无权限（HTTP " + v.status + "）";
+      return;
+    }
+    GHStore.setToken(tok);
+    showGhStatus(v.login);
+    await enterAdmin();
   });
 
+  function showGhStatus(login) {
+    const el = $("#ghStatus");
+    if (el) el.textContent = "● 已连接 GitHub · @" + (login || "?");
+  }
+
   async function enterAdmin() {
-    // 只读查看模式：直接读取仓库内静态数据文件，无需任何 Token
+    const tok = GHStore.token();
+    if (!tok) {
+      $("#loginView").hidden = false;
+      $("#appView").hidden = true;
+      return;
+    }
+    // 先显示后台框架，再加载数据，避免异常导致卡在登录页
     $("#loginView").hidden = true;
     $("#appView").hidden = false;
-    document.body.classList.add("readonly");
-    const gs = $("#ghStatus");
-    if (gs) gs.textContent = "只读模式 · 查看";
     try {
       await loadStockAdmin();
     } catch (e) {
       console.error("[loadStockAdmin]", e);
-      toast("库存加载失败");
+      toast("库存加载失败：" + (e && e.message ? e.message : e));
     }
     try {
       await loadReturnsAdmin();
     } catch (e) {
       console.error("[loadReturnsAdmin]", e);
-      toast("退货加载失败");
+      toast("退货加载失败：" + (e && e.message ? e.message : e));
     }
   }
 
   $("#logoutBtn").addEventListener("click", () => {
-    try { sessionStorage.removeItem("aup_view_ok"); } catch (e) {}
+    GHStore.setToken("");
     location.reload();
   });
 
@@ -107,15 +120,17 @@
 
   /* ---------- 库存管理 ---------- */
   async function loadStockAdmin() {
-    let data = null;
-    try {
-      const r = await fetch(STOCK_PATH, { cache: "no-store" });
-      if (!r.ok) throw 0;
-      data = await r.json();
-    } catch (e) {
-      data = null;
+    const res = await GHStore.read(STOCK_PATH);
+    if (res.notFound) {
+      stock = JSON.parse(JSON.stringify(DEFAULT_STOCK));
+      stockSha = null;
+    } else if (res.error) {
+      toast("库存读取失败：" + res.error);
+      return;
+    } else {
+      stock = res.content && Array.isArray(res.content.items) ? res.content : JSON.parse(JSON.stringify(DEFAULT_STOCK));
+      stockSha = res.sha;
     }
-    stock = data && Array.isArray(data.items) ? data : JSON.parse(JSON.stringify(DEFAULT_STOCK));
     stockLoaded = true;
     renderStockAdmin();
   }
@@ -132,14 +147,21 @@
     }
     tb.innerHTML = items
       .map(
-        (it) => `<tr>
+        (it, i) => `<tr>
           <td>${esc(it.family)}</td>
           <td>${esc(it.color)}</td>
           <td>${esc(it.plug)}</td>
-          <td class="num">${it.qty == null ? 0 : it.qty}</td>
+          <td><input class="stock-qty-input" type="number" min="0" step="1" value="${it.qty == null ? 0 : it.qty}" data-i="${i}"></td>
         </tr>`
       )
       .join("");
+    $$("#stockTable .stock-qty-input").forEach((inp) =>
+      inp.addEventListener("input", () => {
+        const i = +inp.dataset.i;
+        stock.items[i].qty = Math.max(0, parseInt(inp.value, 10) || 0);
+        renderStockOverview(stock.items);
+      })
+    );
     renderStockOverview(items);
     const u = stock.updatedAt ? new Date(stock.updatedAt) : null;
     $("#stockUpdatedAt").textContent = u
@@ -163,25 +185,45 @@
       '<div class="ov-card out"><span class="ov-num">' + out + '</span><span class="ov-label">缺货</span></div>';
   }
 
-  /* ---------- 退货 / 补发管理（只读查看） ---------- */
+  $("#saveStockBtn").addEventListener("click", async () => {
+    const btn = $("#saveStockBtn");
+    btn.disabled = true;
+    stock.updatedAt = new Date().toISOString();
+    const res = await GHStore.write(STOCK_PATH, stock, stockSha, "更新实时库存（后台）");
+    btn.disabled = false;
+    if (res.ok) {
+      stockSha = res.sha || stockSha;
+      $("#stockUpdatedAt").textContent = "最近更新：" + new Date(stock.updatedAt).toLocaleString("zh-CN", { hour12: false });
+      toast("库存已保存并提交到 GitHub ✓（访客稍后可见）");
+    } else {
+      toast("库存保存失败：" + (res.error || res.status));
+    }
+  });
+
+  /* ---------- 退货 / 补发管理（独立台账，不影响库存） ---------- */
+  function genId(p) {
+    return p + "_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  }
   function statusTag(s) {
     const cls = s === "待补发" ? "st-pending" : s === "已补发" ? "st-shipped" : "st-received";
     return '<span class="st-tag ' + cls + '">' + esc(s) + "</span>";
   }
 
   async function loadReturnsAdmin() {
-    let data = null;
-    try {
-      const r = await fetch(RETURNS_PATH, { cache: "no-store" });
-      if (!r.ok) throw 0;
-      data = await r.json();
-    } catch (e) {
-      data = null;
+    const res = await GHStore.read(RETURNS_PATH);
+    if (res.notFound) {
+      returnsData = { returns: [], reships: [] };
+      returnsSha = null;
+    } else if (res.error) {
+      toast("退货读取失败：" + res.error);
+      return;
+    } else {
+      returnsData = {
+        returns: Array.isArray(res.content.returns) ? res.content.returns : [],
+        reships: Array.isArray(res.content.reships) ? res.content.reships : []
+      };
+      returnsSha = res.sha;
     }
-    returnsData = {
-      returns: data && Array.isArray(data.returns) ? data.returns : [],
-      reships: data && Array.isArray(data.reships) ? data.reships : []
-    };
     returnsLoaded = true;
     renderReturns();
   }
@@ -289,7 +331,7 @@
     if (returnFilter.voltage !== "全部") rows = rows.filter((x) => x.voltage === returnFilter.voltage);
     rows.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
     if (!rows.length) {
-      tb.innerHTML = '<tr><td colspan="8" style="color:#8A97A8;padding:14px">暂无退货记录</td></tr>';
+      tb.innerHTML = '<tr><td colspan="9" style="color:#8A97A8;padding:14px">暂无退货记录</td></tr>';
       return;
     }
     tb.innerHTML = rows
@@ -304,9 +346,13 @@
           "<td>" + esc(x.date || "-") + "</td>" +
           "<td>" + esc(x.source || "-") + "</td>" +
           "<td>" + esc(x.reason || "-") + "</td>" +
+          '<td><button class="row-del" data-del-return="' + esc(x.id) + '">删除</button></td>' +
           "</tr>"
       )
       .join("");
+    $$("#returnTable [data-del-return]").forEach((b) =>
+      b.addEventListener("click", () => deleteReturn(b.dataset.delReturn))
+    );
   }
 
   function renderReshipOptions() {
@@ -335,7 +381,7 @@
     if (reshipFilter.voltage !== "全部") rows = rows.filter((x) => x.voltage === reshipFilter.voltage);
     rows.sort((a, b) => (b.shipDate || "").localeCompare(a.shipDate || ""));
     if (!rows.length) {
-      tb.innerHTML = '<tr><td colspan="9" style="color:#8A97A8;padding:14px">暂无补发记录</td></tr>';
+      tb.innerHTML = '<tr><td colspan="10" style="color:#8A97A8;padding:14px">暂无补发记录</td></tr>';
       return;
     }
     tb.innerHTML = rows
@@ -351,21 +397,96 @@
           "<td>" + esc(x.supplier || "-") + "</td>" +
           "<td>" + esc(x.tracking || "-") + "</td>" +
           "<td>" + statusTag(x.status || "待补发") + "</td>" +
+          '<td><button class="row-del" data-del-reship="' + esc(x.id) + '">删除</button></td>' +
           "</tr>"
       )
       .join("");
+    $$("#reshipTable [data-del-reship]").forEach((b) =>
+      b.addEventListener("click", () => deleteReship(b.dataset.delReship))
+    );
   }
+
+  async function saveReturns(msg) {
+    returnsData.updatedAt = new Date().toISOString();
+    const payload = summarize(returnsData);
+    const res = await GHStore.write(RETURNS_PATH, payload, returnsSha, "更新退货台账（后台）");
+    if (res.ok) {
+      returnsSha = res.sha || returnsSha;
+      renderReturns();
+      if (msg) toast(msg + " · 已提交到 GitHub ✓");
+    } else {
+      toast("保存失败：" + (res.error || res.status));
+    }
+  }
+
+  async function deleteReturn(id) {
+    returnsData.returns = returnsData.returns.filter((x) => x.id !== id);
+    returnsData.reships = returnsData.reships.filter((x) => x.returnId !== id);
+    await saveReturns("已删除退货记录");
+  }
+  async function deleteReship(id) {
+    returnsData.reships = returnsData.reships.filter((x) => x.id !== id);
+    await saveReturns("已删除补发记录");
+  }
+
+  $("#returnForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const item = {
+      id: genId("r"),
+      family: fd.get("family"),
+      color: (fd.get("color") || "").trim(),
+      plug: (fd.get("plug") || "").trim(),
+      voltage: fd.get("voltage"),
+      qty: Math.max(0, parseInt(fd.get("qty"), 10) || 0),
+      date: fd.get("date") || new Date().toISOString().slice(0, 10),
+      source: (fd.get("source") || "").trim(),
+      reason: (fd.get("reason") || "").trim(),
+      note: (fd.get("note") || "").trim(),
+      createdAt: new Date().toISOString(),
+    };
+    if (!item.family || !item.qty) { toast("请填写型号和数量"); return; }
+    returnsData.returns.push(item);
+    saveReturns("退货记录已添加 ✓");
+    e.target.reset();
+  });
+
+  $("#reshipForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const item = {
+      id: genId("s"),
+      returnId: fd.get("returnId") || "",
+      family: fd.get("family"),
+      color: (fd.get("color") || "").trim(),
+      plug: (fd.get("plug") || "").trim(),
+      voltage: fd.get("voltage"),
+      qty: Math.max(0, parseInt(fd.get("qty"), 10) || 0),
+      shipDate: fd.get("shipDate") || new Date().toISOString().slice(0, 10),
+      supplier: (fd.get("supplier") || "").trim(),
+      tracking: (fd.get("tracking") || "").trim(),
+      status: fd.get("status") || "待补发",
+      note: (fd.get("note") || "").trim(),
+      createdAt: new Date().toISOString(),
+    };
+    if (!item.family || !item.qty) { toast("请填写型号和数量"); return; }
+    returnsData.reships.push(item);
+    saveReturns("补发记录已添加 ✓");
+    e.target.reset();
+  });
 
   $("#returnFilterFamily").addEventListener("change", (e) => { returnFilter.family = e.target.value; renderReturnTable(); });
   $("#returnFilterVoltage").addEventListener("change", (e) => { returnFilter.voltage = e.target.value; renderReturnTable(); });
   $("#reshipFilterFamily").addEventListener("change", (e) => { reshipFilter.family = e.target.value; renderReshipTable(); });
   $("#reshipFilterVoltage").addEventListener("change", (e) => { reshipFilter.voltage = e.target.value; renderReshipTable(); });
 
-  /* ---------- 初始化：若本会话已解锁则直接进入 ---------- */
+  /* ---------- 初始化：若有会话直接进后台 ---------- */
   (async () => {
-    let ok = false;
-    try { ok = sessionStorage.getItem("aup_view_ok") === "1"; } catch (e) {}
-    if (ok) { enterAdmin(); return; }
+    if (GHStore.token()) {
+      const v = await GHStore.verify(GHStore.token());
+      if (v.ok) { showGhStatus(v.login); await enterAdmin(); return; }
+      GHStore.setToken("");
+    }
     $("#loginView").hidden = false;
     $("#appView").hidden = true;
   })();

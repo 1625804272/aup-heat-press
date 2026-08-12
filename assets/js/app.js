@@ -678,39 +678,10 @@
 
   /* ===== 入口 ===== */
   (async function () {
-    var gate = document.getElementById("gate");
-    var form = document.getElementById("gateForm");
-    var err = document.getElementById("gateErr");
-    var status = document.getElementById("gateStatus");
-    var uname = document.getElementById("gateUser");
-    var pass = document.getElementById("gatePass");
-
-    async function loadAndBoot() {
-      try {
-        var r = await fetch("/api/data", { cache: "no-store", credentials: "same-origin" });
-        if (r.ok) { boot(await r.json()); return true; }
-      } catch (e) { /* 无后端 → 回退 */ }
-      return false;
-    }
-    function showGate() {
-      gate.hidden = false;
-      form.addEventListener("submit", async function (e) {
-        e.preventDefault();
-        err.style.display = "none";
-        status.style.display = "block";
-        status.textContent = t("gate_status");
-        try {
-          var lr = await fetch("/api/login", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin", body: JSON.stringify({ user: uname.value.trim(), pass: pass.value }) });
-          if (lr.ok && (await loadAndBoot())) { gate.hidden = true; status.style.display = "none"; return; }
-          err.textContent = t("gate_err");
-        } catch (ex) { err.textContent = t("gate_err"); }
-        err.style.display = "block";
-        status.style.display = "none";
-      });
-    }
-
-    if (await loadAndBoot()) return;
+    try {
+      var r = await fetch("/api/data", { cache: "no-store", credentials: "same-origin" });
+      if (r.ok) { boot(await r.json()); return; }
+    } catch (e) { /* 无后端 → 回退静态数据 */ }
     if (window.PRODUCT_DATA) { boot(window.PRODUCT_DATA); return; }
-    showGate();
   })();
 })();

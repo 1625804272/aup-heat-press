@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="assets/css/style.css?v=20260808" />
 </head>
 <body>
+  <!-- 网站访问密码门（auplex2026） -->
+  <script src="assets/js/site-gate.js?v=20260812b"></script>
   <!-- progress bar -->
   <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -164,24 +166,8 @@
 
   <!-- 机型详情已迁至 product-detail.html（点击产品卡片跳转） -->
 
-  <!-- 登录墙（加密数据需密码解密；默认隐藏，仅在加密模式下由 app.js 显示） -->
-  <div class="gate" id="gate" hidden>
-    <form class="gate-card" id="gateForm" autocomplete="on">
-      <div class="gate-badge" data-i18n="gate_badge">AUP · 内部资料</div>
-      <h1 class="gate-title" data-i18n="gate_title">登录访问</h1>
-      <p class="gate-sub" data-i18n="gate_sub">本站点为保密内容，请输入账号密码</p>
-      <p class="gate-err" id="gateErr" data-i18n="gate_err">账号或密码错误，请重试</p>
-      <label class="gate-label" for="gateUser" data-i18n="gate_user">账号</label>
-      <input class="gate-input" id="gateUser" name="user" type="text" autocomplete="username" placeholder="请输入账号" data-i18n-attr="placeholder:gate_user_placeholder" required />
-      <label class="gate-label" for="gatePass" data-i18n="gate_pass">密码</label>
-      <input class="gate-input" id="gatePass" name="pass" type="password" autocomplete="current-password" placeholder="请输入密码" data-i18n-attr="placeholder:gate_pass_placeholder" required />
-      <button class="gate-btn" type="submit" data-i18n="gate_btn">登 录</button>
-      <p class="gate-status" id="gateStatus" data-i18n="gate_status">正在解密…</p>
-    </form>
-  </div>
-
   <script src="assets/js/data.js?v=20260808"></script>
   <script src="assets/js/i18n.js?v=20260808b"></script>
-  <script src="assets/js/app.js?v=20260808b"></script>
+  <script src="assets/js/app.js?v=20260812b"></script>
 </body>
 </html>

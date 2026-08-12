@@ -1,7 +1,30 @@
 {
-  "updatedAt": null,
-  "overview": { "totalReturns": 0, "pendingReship": 0, "shipped": 0, "received": 0, "recentReturns": 0 },
-  "byModel": [],
-  "returns": [],
+  "updatedAt": "2026-08-12T05:09:18.424Z",
+  "overview": {
+    "totalReturns": 1,
+    "pendingReship": 0,
+    "shipped": 0,
+    "received": 0,
+    "recentReturns": 0
+  },
+  "byModel": [
+    {
+      "family": "AUP-L3",
+      "returned": 1,
+      "reshiped": 0,
+      "pending": 0
+    }
+  ],
+  "returns": [
+    {
+      "family": "AUP-L3",
+      "color": "绿色",
+      "plug": "中插",
+      "voltage": "220V",
+      "qty": 1,
+      "date": "2026-08-03",
+      "source": "A48"
+    }
+  ],
   "reships": []
 }

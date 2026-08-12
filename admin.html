@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/style.css" />
-  <link rel="stylesheet" href="assets/css/admin.css?v=20260812a" />
+  <link rel="stylesheet" href="assets/css/admin.css?v=20260808c" />
 </head>
 <body class="admin-body">
   <!-- 登录视图 -->
@@ -16,11 +16,15 @@
     <form id="loginForm" class="login-card">
       <div class="login-logo">A</div>
       <h1>熨斗产品后台</h1>
-      <p class="login-sub">输入访问密码，查看实时库存与退货台账</p>
-      <label>访问密码 *</label>
-      <input type="password" id="loginPass" autocomplete="off" placeholder="请输入访问密码" />
-      <p class="login-hint">后台为只读查看模式：可查看实时库存与退货台账明细。修改数据需直接编辑仓库文件。访问密码请联系管理员获取。</p>
-      <button type="submit" class="btn-primary">进 入</button>
+      <p class="login-sub">登录后可维护实时库存</p>
+      <label>账号</label>
+      <input type="text" id="loginUser" autocomplete="username" placeholder="admin" />
+      <label>密码（可选）</label>
+      <input type="password" id="loginPass" autocomplete="current-password" placeholder="站点密码，可留空" />
+      <label>GitHub Token *</label>
+      <input type="password" id="loginToken" autocomplete="off" placeholder="ghp_... 或 github_pat_..." />
+      <p class="login-hint">GitHub 版后台以 Token 鉴权：用含 <b>repo</b> 权限的经典令牌（github.com/settings/tokens 生成）。Token 仅存于本次会话，保存即提交到仓库，访客稍后可见。</p>
+      <button type="submit" class="btn-primary">登 录</button>
       <div id="loginErr" class="login-err"></div>
     </form>
   </div>
@@ -30,7 +34,7 @@
     <header class="admin-top">
       <div class="admin-brand"><span class="mark">A</span> 熨斗产品 · 后台管理</div>
       <div class="admin-top-right">
-        <span id="ghStatus" class="gh-status">只读模式</span>
+        <span id="ghStatus" class="gh-status">未连接 GitHub</span>
         <button id="logoutBtn" class="btn-ghost">退出</button>
       </div>
     </header>
@@ -47,7 +51,7 @@
           <h2>库存管理</h2>
           <div class="stock-head-right">
             <span id="stockUpdatedAt" class="stock-updated-at">尚未更新</span>
-            <button id="saveStockBtn" class="btn-primary sm edit-only">保存库存</button>
+            <button id="saveStockBtn" class="btn-primary sm">保存库存</button>
           </div>
         </div>
         <p class="hint">常备库存实时维护。修改数量后点「保存库存」写入；下方显示最近更新时间。</p>
@@ -88,7 +92,7 @@
 
         <!-- 退货登记 -->
         <h3 class="section-sub">退货登记</h3>
-        <form class="form-grid edit-only" id="returnForm">
+        <form class="form-grid" id="returnForm">
           <div class="field">
             <label>型号 *</label>
             <select name="family" required>
@@ -169,7 +173,7 @@
 
         <!-- 供应商补发 -->
         <h3 class="section-sub">供应商补发登记</h3>
-        <form class="form-grid edit-only" id="reshipForm">
+        <form class="form-grid" id="reshipForm">
           <div class="field">
             <label>关联退货（可选）</label>
             <select name="returnId" id="returnLinkSelect">
@@ -277,7 +281,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="assets/js/github-store.js?v=20260812a"></script>
-  <script src="assets/js/admin.js?v=20260812a"></script>
+  <script src="assets/js/github-store.js?v=20260808c"></script>
+  <script src="assets/js/admin.js?v=20260808c"></script>
 </body>
 </html>

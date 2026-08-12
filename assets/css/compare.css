@@ -116,7 +116,7 @@
 .cmp-head-link:hover { text-decoration: underline; }
 .cmp-remove {
   position: absolute;
-  top: -8px; right: -8px;
+  top: 6px; right: 6px;
   width: 26px; height: 26px;
   border: none; border-radius: 50%;
   background: var(--danger); color: #fff;
@@ -124,6 +124,7 @@
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(220, 74, 61, 0.35);
   transition: transform .15s ease;
+  z-index: 2;
 }
 .cmp-remove:hover { transform: scale(1.12); }
 

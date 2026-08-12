@@ -27,7 +27,6 @@
       <a href="#families" data-i18n="nav_products">产品系列</a>
       <a href="#catalog" data-i18n="nav_catalog">全部机型</a>
       <a href="#stock" data-i18n="nav_stock">实时库存</a>
-      <a href="#returns" data-i18n="nav_returns">退货台账</a>
       <a href="rules.html" data-i18n="nav_rules">特采规则</a>
       <a href="calc.html" data-i18n="nav_calc">报价计算器</a>
     </nav>
@@ -108,34 +107,6 @@
     <p class="stock-note" id="stockNote" hidden></p>
   </section>
 
-  <!-- RETURNS -->
-  <section class="section section-alt" id="returns">
-    <div class="section-head">
-      <span class="kicker">RETURNS LEDGER</span>
-      <h2 data-i18n="returns_h2">退货台账</h2>
-      <p data-i18n="returns_p">退货与供应商补发台账概览（公开聚合）。型号、颜色、插头、电压、补发明细与登记请在后台「退货管理」中维护。</p>
-    </div>
-    <div class="stock-bar">
-      <span class="stock-updated" id="returnsUpdated" data-i18n-attr="data-prefix:stock_updated_prefix">更新时间：加载中…</span>
-      <button class="btn btn-ghost sm" id="returnsRefresh" type="button" data-i18n="returns_refresh">↻ 刷新</button>
-    </div>
-    <div class="ov-grid" id="returnsOverview"></div>
-    <div class="detail-block">
-      <div class="detail-head">
-        <span id="detailTitle" data-i18n="returns_detail_all">退货明细 · 全部</span>
-        <button class="btn btn-ghost sm" id="detailClear" type="button" hidden data-i18n="returns_clear">✕ 清除筛选</button>
-      </div>
-      <div class="src-filter" id="returnsSourceFilter"></div>
-      <div class="table-wrap">
-        <table class="returns-table" id="returnsDetailTable"></table>
-      </div>
-    </div>
-    <div class="table-wrap" style="margin-top:18px">
-      <table class="returns-table" id="returnsModelTable"></table>
-    </div>
-    <p class="stock-note" id="returnsNote" hidden></p>
-  </section>
-
   <!-- FOOTER -->
   <footer class="footer">
     <div class="footer-inner">
@@ -168,6 +139,6 @@
 
   <script src="assets/js/data.js?v=20260808"></script>
   <script src="assets/js/i18n.js?v=20260808b"></script>
-  <script src="assets/js/app.js?v=20260812b"></script>
+  <script src="assets/js/app.js?v=20260812c"></script>
 </body>
 </html>

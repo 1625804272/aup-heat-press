@@ -69,19 +69,6 @@
     var s = D.specs[p.family];
     return s && s._image ? s._image : null;
   }
-  function escStock(s) {
-    return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
-      return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]);
-    });
-  }
-  function fmtStockTime(iso) {
-    if (!iso) return t("stock_updated_prefix") ? "—" : "—";
-    try {
-      var d = new Date(iso);
-      var p = function (n) { return String(n).padStart(2, "0"); };
-      return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + " " + p(d.getHours()) + ":" + p(d.getMinutes());
-    } catch (e) { return iso; }
-  }
   function observeReveal() {
     if (!("IntersectionObserver" in window)) return;
     var io = new IntersectionObserver(function (entries) {
@@ -305,52 +292,6 @@
       '<div class="r-amount" style="font-size:12px;color:var(--ink-faint);margin-top:8px">' + t("calc_scale") + '</div>';
   }
 
-  /* ===== 渲染：实时库存 ===== */
-  function renderStock(s) {
-    var grid = $("#stockGrid");
-    var upd = $("#stockUpdated");
-    var items = (s && s.items) || [];
-    upd.textContent = t("stock_updated_prefix") + fmtStockTime(s && s.updatedAt);
-    if (!items.length) { grid.innerHTML = '<p class="stock-empty">' + t("stock_empty") + '</p>'; return; }
-    var famOrder = FAMILY_ORDER.filter(function (f) { return items.some(function (it) { return it.family === f; }); });
-    grid.innerHTML = famOrder.map(function (f) {
-      var famItems = items.filter(function (it) { return it.family === f; });
-      var meta = D.familyMeta[f] || { name: f };
-      return '<div class="stock-family"><div class="stock-family-name">' + escStock(meta.name || f) +
-        ' <span>' + escStock(f) + '</span></div><div class="stock-items">' +
-        famItems.map(function (it) {
-          var out = it.qty === 0, low = it.qty > 0 && it.qty <= 5;
-          return '<div class="stock-card reveal ' + (out ? "is-out" : low ? "is-low" : "") + '">' +
-            '<span class="stock-dot" style="background:' + colorHex(it.color) + '" title="' + escStock(it.color) + '"></span>' +
-            '<div class="stock-info"><div class="stock-color">' + escStock(colorName(it.color)) + '</div><div class="stock-plug">' + escStock(plugName(it.plug)) + '</div></div>' +
-            '<div class="stock-qty">' + it.qty + '<small>' + t("unit") + '</small></div>' +
-            '<div class="stock-status">' + (out ? t("status_out") : low ? t("status_low") : t("status_ok")) + '</div>' +
-          '</div>';
-        }).join("") + '</div></div>';
-    }).join("");
-    observeReveal();
-  }
-  async function loadStock() {
-    var grid = $("#stockGrid");
-    $("#stockUpdated").textContent = t("stock_updated_prefix") + "…";
-    try {
-      var r = await fetch("/api/stock", { cache: "no-store" });
-      if (!r.ok) throw new Error("接口不可用");
-      renderStock(await r.json());
-    } catch (e) {
-      // 静态回退：GitHub Pages 等无 Functions 环境读取打包的库存快照
-      try {
-        var rs = await fetch("assets/data/stock.json", { cache: "no-store" });
-        if (rs.ok) {
-          renderStock(await rs.json());
-          $("#stockUpdated").textContent = t("stock_updated_prefix") + t("static_snapshot");
-          return;
-        }
-      } catch (_) {}
-      grid.innerHTML = '<p class="stock-empty">' + t("stock_unavailable") + '</p>';
-      $("#stockUpdated").textContent = t("stock_updated_prefix") + "—";
-    }
-  }
 
 
   /* ===== 渲染：MODAL ===== */
@@ -448,7 +389,6 @@
       var c = e.target.closest(".product-card"); if (!c) return;
       location.href = "product-detail.html?k3=" + encodeURIComponent(c.getAttribute("data-k3"));
     });
-    var stockRefreshBtn = $("#stockRefresh"); if (stockRefreshBtn) stockRefreshBtn.addEventListener("click", loadStock);
     var cbChips = $("#cbChips");
     if (cbChips) cbChips.addEventListener("click", function (e) {
       var x = e.target.closest(".cb-chip-x"); if (!x) return;
@@ -466,7 +406,6 @@
     renderFamilies();
     renderFilters();
     renderCatalog();
-    loadStock();
     applyI18n();
     $$(".section-head").forEach(function (el) { el.classList.add("reveal"); });
     observeReveal();

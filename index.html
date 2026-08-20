@@ -26,7 +26,6 @@
     <nav class="nav-links" id="navLinks">
       <a href="#families" data-i18n="nav_products">产品系列</a>
       <a href="#catalog" data-i18n="nav_catalog">全部机型</a>
-      <a href="#stock" data-i18n="nav_stock">实时库存</a>
       <a href="rules.html" data-i18n="nav_rules">特采规则</a>
       <a href="calc.html" data-i18n="nav_calc">报价计算器</a>
     </nav>
@@ -92,21 +91,6 @@
     <div class="catalog-grid" id="catalogGrid"></div>
   </section>
 
-  <!-- STOCK -->
-  <section class="section" id="stock">
-    <div class="section-head">
-      <span class="kicker">LIVE STOCK</span>
-      <h2 data-i18n="stock_h2">实时库存</h2>
-      <p data-i18n="stock_p">常备库存实时查询。数据由后台更新，下方显示最近更新时间。</p>
-    </div>
-    <div class="stock-bar">
-      <span class="stock-updated" id="stockUpdated" data-i18n-attr="data-prefix:stock_updated_prefix">更新时间：加载中…</span>
-      <button class="btn btn-ghost sm" id="stockRefresh" type="button" data-i18n="stock_refresh">↻ 刷新</button>
-    </div>
-    <div class="stock-grid" id="stockGrid"></div>
-    <p class="stock-note" id="stockNote" hidden></p>
-  </section>
-
   <!-- FOOTER -->
   <footer class="footer">
     <div class="footer-inner">
@@ -139,6 +123,6 @@
 
   <script src="assets/js/data.js?v=20260808"></script>
   <script src="assets/js/i18n.js?v=20260808b"></script>
-  <script src="assets/js/app.js?v=20260812c"></script>
+  <script src="assets/js/app.js?v=20260820"></script>
 </body>
 </html>

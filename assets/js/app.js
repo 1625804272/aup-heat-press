@@ -140,7 +140,7 @@
       var m = D.familyMeta[f];
       var s = D.specs[f] || {};
       var skuCount = D.products.filter(function (p) { return p.family === f; }).length;
-      return '<article class="family-card reveal" data-family="' + f + '">' +
+      return '<a class="family-card reveal" href="product-detail.html?family=' + encodeURIComponent(f) + '" data-family="' + f + '">' +
         '<div class="family-thumb">' + (s._image ? '<img src="' + s._image + '" alt="' + familyName(f) + '">' : "") + '</div>' +
         '<div class="family-name">' + familyName(f) + '</div>' +
         '<div class="family-tag">' + familyTag(f) + '</div>' +
@@ -149,8 +149,8 @@
           '<span class="chip">' + skuCount + " " + t("fam_model_unit") + '</span>' +
           '<span class="chip">110/220V</span>' +
         '</div>' +
-        '<span class="family-link" data-goto-spec="' + f + '">' + t("fam_view_spec") + '</span>' +
-      '</article>';
+        '<span class="family-link" aria-hidden="true">' + t("fam_view_detail") + '</span>' +
+      '</a>';
     }).join("");
   }
 
@@ -401,15 +401,6 @@
       var b = e.target.closest(".fbtn"); if (!b) return;
       curColor = b.getAttribute("data-color");
       $$("#filterColor .fbtn").forEach(function (x) { x.classList.remove("active"); }); b.classList.add("active"); renderCatalog();
-    });
-    $("#familyGrid").addEventListener("click", function (e) {
-      var card = e.target.closest(".family-card"); if (!card) return;
-      var f = card.getAttribute("data-family");
-      curFam = f;
-      renderFilters();
-      renderCatalog();
-      var cat = document.getElementById("catalog");
-      if (cat) cat.scrollIntoView({ behavior: "smooth" });
     });
     $("#catalogGrid").addEventListener("click", function (e) {
       var chk = e.target.closest(".cmp-check");

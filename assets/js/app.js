@@ -86,19 +86,51 @@
     return { num: String(Math.round((1 - rate) * 100)), suffix: "%" };
   }
 
-  /* ===== 渲染：HERO ===== */
+  /* ===== 渲染：HERO 数据条 ===== */
   function renderHero() {
     $("#statFam").textContent = Object.keys(D.specs).length;
     $("#statSku").textContent = D.products.length;
-    var orbitImgs = [
-      { src: D.specs["AUP-M2"] && D.specs["AUP-M2"]._image, label: "M2", cls: "orb-1" },
-      { src: D.specs["AUP-L"] && D.specs["AUP-L"]._image, label: "L", cls: "orb-2" },
-      { src: D.specs["AUP-L2"] && D.specs["AUP-L2"]._image, label: "L2", cls: "orb-3" },
-      { src: D.specs["AUP-L3"] && D.specs["AUP-L3"]._image, label: "L3", cls: "orb-4" }
-    ];
-    $("#heroOrbit").innerHTML = orbitImgs.map(function (o) {
-      return o.src ? '<div class="orb ' + o.cls + '" data-label="' + o.label + '"><img src="' + o.src + '" alt="' + o.label + '"></div>' : "";
-    }).join("");
+  }
+
+  /* ===== HERO 轮播 ===== */
+  function initCarousel() {
+    var track = $("#heroTrack"), dots = $("#heroDots");
+    if (!track) return;
+    var slides = track.children, n = slides.length;
+    if (n === 0) return;
+    var idx = 0, timer = null;
+    for (var i = 0; i < n; i++) {
+      var d = document.createElement("button");
+      d.className = "hero-dot" + (i === 0 ? " active" : "");
+      d.type = "button";
+      d.setAttribute("aria-label", "第 " + (i + 1) + " 张");
+      (function (k) { d.addEventListener("click", function () { go(k); restart(); }); })(i);
+      dots.appendChild(d);
+    }
+    function render() {
+      track.style.transform = "translateX(" + (-idx * 100) + "%)";
+      var ds = dots.children;
+      for (var j = 0; j < ds.length; j++) ds[j].classList.toggle("active", j === idx);
+    }
+    function go(k) { idx = (k + n) % n; render(); }
+    function next() { go(idx + 1); }
+    function prev() { go(idx - 1); }
+    function start() { timer = setInterval(next, 5000); }
+    function stop() { if (timer) { clearInterval(timer); timer = null; } }
+    function restart() { stop(); start(); }
+    var car = $("#heroCarousel");
+    if (car) { car.addEventListener("mouseenter", stop); car.addEventListener("mouseleave", restart); }
+    var hp = $("#heroPrev"), hn = $("#heroNext");
+    if (hp) hp.addEventListener("click", function () { prev(); restart(); });
+    if (hn) hn.addEventListener("click", function () { next(); restart(); });
+    var sx = 0, dx = 0, touching = false;
+    if (car) {
+      car.addEventListener("touchstart", function (e) { touching = true; sx = e.touches[0].clientX; dx = 0; stop(); }, { passive: true });
+      car.addEventListener("touchmove", function (e) { if (touching) dx = e.touches[0].clientX - sx; }, { passive: true });
+      car.addEventListener("touchend", function () { if (touching && Math.abs(dx) > 40) { dx < 0 ? next() : prev(); } touching = false; restart(); });
+    }
+    render();
+    start();
   }
 
   /* ===== 渲染：FAMILIES ===== */
@@ -468,7 +500,7 @@
   function boot(data) {
     D = data;
     window.__D = D;
-    if (!initDone) { initEvents(); initDone = true; }
+    if (!initDone) { initEvents(); initCarousel(); initDone = true; }
     renderAll();
   }
   window.__rerender = renderAll;

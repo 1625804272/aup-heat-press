@@ -22,6 +22,9 @@
       nav_stock: "实时库存",
       nav_returns: "退货台账",
       nav_cta: "获取报价",
+      fnav_lines: "产品系列",
+      fnav_tools: "工具",
+      fnav_about: "关于",
 
       hero_eyebrow: "2026 产品手册 · 业务技术专用",
       hero_title_accent: "精准压烫，从一块发热板开始",
@@ -32,6 +35,13 @@
       hero_stat_sku: "在售机型",
       hero_stat_volt: "双电压",
       hero_stat_cert: "国际认证",
+
+      hero2_eyebrow: "AUP 扩展系列",
+      hero2_title: "双电压 · 多国认证",
+      hero2_sub: "110V / 220V 全系通吃，CE / ROHS / FCC / UL 认证齐全，出口全球无压力。",
+      hero3_eyebrow: "特氟龙纯铝发热板",
+      hero3_title: "品质，从一块发热板开始",
+      hero3_sub: "特氟龙烤漆纯铝发热板，耐高温、不粘织物；U 型发热管温度更均匀，压烫效果更稳定。",
 
       fam_h2: "四大产品系列",
       fam_p: "从 2.5 寸迷你到 12 寸台式，按发热板尺寸与用途划分，总有一款适配你的压烫场景。",
@@ -215,6 +225,9 @@
       nav_stock: "Live Stock",
       nav_returns: "Returns Ledger",
       nav_cta: "Get a Quote",
+      fnav_lines: "Product Lines",
+      fnav_tools: "Tools",
+      fnav_about: "About",
 
       hero_eyebrow: "2026 Catalog · Sales & Technical",
       hero_title_accent: "Precision pressing, from one heating plate",
@@ -225,6 +238,13 @@
       hero_stat_sku: "Models",
       hero_stat_volt: "Dual voltage",
       hero_stat_cert: "Certifications",
+
+      hero2_eyebrow: "AUP Extended Series",
+      hero2_title: "Dual voltage · multi-certified",
+      hero2_sub: "110V / 220V across the line, with CE / ROHS / FCC / UL certifications — ready for global export.",
+      hero3_eyebrow: "PTFE pure-aluminum plate",
+      hero3_title: "Quality starts with the heating plate",
+      hero3_sub: "Teflon-coated pure-aluminum heating plate: heat-resistant and non-stick. The U-shaped heater keeps temperature even for stable results.",
 
       fam_h2: "Four Product Lines",
       fam_p: "From 2.5-inch mini to 12-inch desktop, grouped by heating-plate size and use — there is a fit for every pressing scenario.",
@@ -432,6 +452,9 @@
       nav_stock: "Склад",
       nav_returns: "Возвраты",
       nav_cta: "Запросить цену",
+      fnav_lines: "Линейки",
+      fnav_tools: "Инструменты",
+      fnav_about: "О нас",
 
       hero_eyebrow: "Каталог 2026 · Продажи и техника",
       hero_title_accent: "Точная прессовка, от одной нагревательной плиты",
@@ -442,6 +465,13 @@
       hero_stat_sku: "Модели",
       hero_stat_volt: "Двойное напряжение",
       hero_stat_cert: "Сертификаты",
+
+      hero2_eyebrow: "Серия AUP Extended",
+      hero2_title: "Двойное напряжение · мультисертификаты",
+      hero2_sub: "110V / 220V во всей линейке, сертификаты CE / ROHS / FCC / UL — готово к экспорту по всему миру.",
+      hero3_eyebrow: "Плита из чистого алюминия с PTFE",
+      hero3_title: "Качество начинается с нагревательной плиты",
+      hero3_sub: "Плита из чистого алюминия с тефлоновым покрытием: термостойкая и не прилипает. U-образный нагреватель даёт ровную температуру и стабильный результат.",
 
       fam_h2: "Четыре линейки продукции",
       fam_p: "От мини 2.5 дюйма до настольного 12 дюймов, по размеру плиты и назначению — найдётся вариант под любую задачу.",
@@ -625,6 +655,9 @@
       nav_stock: "Stock en vivo",
       nav_returns: "Devoluciones",
       nav_cta: "Solicitar cotización",
+      fnav_lines: "Líneas",
+      fnav_tools: "Herramientas",
+      fnav_about: "Acerca de",
 
       hero_eyebrow: "Catálogo 2026 · Ventas y técnica",
       hero_title_accent: "Planchado de precisión, desde una placa calefactora",
@@ -635,6 +668,13 @@
       hero_stat_sku: "Modelos",
       hero_stat_volt: "Doble voltaje",
       hero_stat_cert: "Certificaciones",
+
+      hero2_eyebrow: "Serie AUP Extended",
+      hero2_title: "Doble voltaje · multicalificada",
+      hero2_sub: "110V / 220V en toda la línea, con certificaciones CE / ROHS / FCC / UL — lista para exportar al mundo.",
+      hero3_eyebrow: "Placa de aluminio puro con PTFE",
+      hero3_title: "La calidad empieza por la placa calefactora",
+      hero3_sub: "Placa de aluminio puro con revestimiento de teflón: resistente al calor y antiadherente. El calentador en U mantiene temperatura uniforme y resultados estables.",
 
       fam_h2: "Cuatro líneas de productos",
       fam_p: "De mini 2.5 pulgadas a escritorio 12 pulgadas, por tamaño de placa y uso — hay una opción para cada necesidad.",

@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Noto+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/style.css?v=20260808" />
+  <link rel="stylesheet" href="assets/css/style.css?v=20260824" />
 </head>
 <body>
   <!-- 网站访问密码门（auplex2026） -->
@@ -37,33 +37,69 @@
     </div>
   </header>
 
-  <!-- HERO -->
+  <!-- HERO · 全宽 banner 轮播 -->
   <section class="hero" id="top">
-    <div class="hero-bg" aria-hidden="true"></div>
-    <div class="hero-glow" aria-hidden="true"></div>
-    <div class="hero-grid">
-      <div class="hero-copy">
-        <span class="eyebrow" data-i18n="hero_eyebrow">2026 产品手册 · 业务技术专用</span>
-        <h1 class="hero-title"><span data-i18n="hero_brand">AUP 熨斗机</span><br/><span class="accent" data-i18n="hero_title_accent">精准压烫，从一块发热板开始</span></h1>
-        <p class="hero-sub" data-i18n="hero_sub">面向热转印、白墨、服饰定制等场景的迷你 / 台式压烫机系列。双电压、多国认证、特氟龙纯铝发热板，覆盖从家居烫画到批量生产的全需求。</p>
-        <div class="hero-actions">
-          <a href="#catalog" class="btn btn-primary" data-i18n="hero_btn_catalog">浏览全部机型</a>
-          <a href="calc.html" class="btn btn-ghost" data-i18n="hero_btn_calc">结算价测算 →</a>
+    <div class="hero-carousel" id="heroCarousel">
+      <div class="hero-track" id="heroTrack">
+        <div class="hero-slide">
+          <div class="hero-slide-bg"></div>
+          <div class="hero-slide-copy">
+            <span class="hero-eyebrow" data-i18n="hero_eyebrow">2026 产品手册 · 业务技术专用</span>
+            <h1 class="hero-slide-title"><span data-i18n="hero_brand">AUP 熨斗机</span><br/><span class="hero-accent" data-i18n="hero_title_accent">精准压烫，从一块发热板开始</span></h1>
+            <p class="hero-slide-sub" data-i18n="hero_sub">面向热转印、白墨、服饰定制等场景的迷你 / 台式压烫机系列。双电压、多国认证、特氟龙纯铝发热板，覆盖从家居烫画到批量生产的全需求。</p>
+            <div class="hero-actions">
+              <a href="#catalog" class="btn btn-primary" data-i18n="hero_btn_catalog">浏览全部机型</a>
+              <a href="calc.html" class="btn btn-ghost" data-i18n="hero_btn_calc">结算价测算 →</a>
+            </div>
+          </div>
+          <div class="hero-slide-media"><img src="assets/img/l.png" alt="AUP-L 9寸压烫机"></div>
         </div>
+        <div class="hero-slide">
+          <div class="hero-slide-bg"></div>
+          <div class="hero-slide-copy">
+            <span class="hero-eyebrow" data-i18n="hero2_eyebrow">AUP 扩展系列</span>
+            <h1 class="hero-slide-title" data-i18n="hero2_title">双电压 · 多国认证</h1>
+            <p class="hero-slide-sub" data-i18n="hero2_sub">110V / 220V 全系通吃，CE / ROHS / FCC / UL 认证齐全，出口全球无压力。</p>
+            <div class="hero-actions">
+              <a href="#catalog" class="btn btn-primary" data-i18n="hero_btn_catalog">浏览全部机型</a>
+              <a href="calc.html" class="btn btn-ghost" data-i18n="hero_btn_calc">结算价测算 →</a>
+            </div>
+          </div>
+          <div class="hero-slide-media"><img src="assets/img/l2.png" alt="AUP-L2 12寸压烫机"></div>
+        </div>
+        <div class="hero-slide">
+          <div class="hero-slide-bg"></div>
+          <div class="hero-slide-copy">
+            <span class="hero-eyebrow" data-i18n="hero3_eyebrow">特氟龙纯铝发热板</span>
+            <h1 class="hero-slide-title" data-i18n="hero3_title">品质，从一块发热板开始</h1>
+            <p class="hero-slide-sub" data-i18n="hero3_sub">特氟龙烤漆纯铝发热板，耐高温、不粘织物；U 型发热管温度更均匀，压烫效果更稳定。</p>
+            <div class="hero-actions">
+              <a href="#catalog" class="btn btn-primary" data-i18n="hero_btn_catalog">浏览全部机型</a>
+              <a href="calc.html" class="btn btn-ghost" data-i18n="hero_btn_calc">结算价测算 →</a>
+            </div>
+          </div>
+          <div class="hero-slide-media"><img src="assets/img/l3.png" alt="AUP-L3 7.5寸压烫机"></div>
+        </div>
+      </div>
+      <div class="hero-controls">
+        <div class="hero-dots" id="heroDots"></div>
+        <div class="hero-arrows">
+          <button class="hero-arrow" id="heroPrev" type="button" aria-label="上一张">‹</button>
+          <button class="hero-arrow" id="heroNext" type="button" aria-label="下一张">›</button>
+        </div>
+      </div>
+    </div>
+    <div class="hero-band">
+      <div class="hero-band-inner">
         <ul class="hero-stats">
           <li><b id="statFam">4</b><span data-i18n="hero_stat_families">产品系列</span></li>
           <li><b id="statSku">11</b><span data-i18n="hero_stat_sku">在售机型</span></li>
           <li><b>110/220</b><span data-i18n="hero_stat_volt">双电压</span></li>
           <li><b data-i18n="hero_stat_cert_value">4 项</b><span data-i18n="hero_stat_cert">国际认证</span></li>
         </ul>
-      </div>
-      <div class="hero-visual">
-        <div class="hero-orbit" id="heroOrbit" aria-hidden="true"></div>
+        <a class="hero-band-cta" href="calc.html"><span data-i18n="nav_cta">获取报价</span> →</a>
       </div>
     </div>
-    <a href="#families" class="scroll-hint" aria-label="向下滚动" data-i18n-attr="aria-label:aria_scroll_down">
-      <span></span>
-    </a>
   </section>
 
   <!-- FAMILIES -->
@@ -93,16 +129,42 @@
 
   <!-- FOOTER -->
   <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-brand">
-        <span class="brand-mark">A</span>
-        <div>
-          <b data-i18n="footer_brand">AUP 熨斗机</b>
-          <p data-i18n="footer_sub">热转印压烫设备 · 产品与结算价手册</p>
+    <div class="footer-top">
+      <div class="footer-inner">
+        <div class="footer-cols">
+          <div class="footer-col footer-col-brand">
+            <span class="brand-mark">A</span>
+            <b data-i18n="footer_brand">AUP 熨斗机</b>
+            <p class="footer-sub" data-i18n="footer_sub">热转印压烫设备 · 产品与结算价手册</p>
+          </div>
+          <div class="footer-col">
+            <h4 data-i18n="fnav_lines">产品系列</h4>
+            <a href="#families" data-i18n="nav_products">产品系列</a>
+            <a href="#catalog" data-i18n="nav_catalog">全部机型</a>
+            <a href="#catalog">AUP-M2</a>
+            <a href="#catalog">AUP-L</a>
+            <a href="#catalog">AUP-L2</a>
+            <a href="#catalog">AUP-L3</a>
+          </div>
+          <div class="footer-col">
+            <h4 data-i18n="fnav_tools">工具</h4>
+            <a href="calc.html" data-i18n="nav_calc">报价计算器</a>
+            <a href="rules.html" data-i18n="nav_rules">特采规则</a>
+            <a href="compare.html" data-i18n="compare_go">机型对比</a>
+          </div>
+          <div class="footer-col">
+            <h4 data-i18n="fnav_about">关于</h4>
+            <a href="admin.html" data-i18n="footer_admin">后台管理</a>
+            <p class="footer-src" data-i18n="footer_src">数据来源：2026熨斗结算价（2026.7.22）业务技术专用。本页价格为业务参考，最终以正式合同为准。</p>
+          </div>
         </div>
       </div>
-      <p class="footer-src" data-i18n="footer_src">数据来源：2026熨斗结算价（2026.7.22）业务技术专用。本页价格为业务参考，最终以正式合同为准。</p>
-      <a class="footer-admin" href="admin.html" title="后台管理" data-i18n="footer_admin" data-i18n-attr="title:admin_title">后台管理</a>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <span>© 2026 AUP 熨斗机 · 热转印压烫设备产品与结算价手册</span>
+        <a class="footer-admin-link" href="admin.html" data-i18n="footer_admin">后台管理</a>
+      </div>
     </div>
   </footer>
 
@@ -123,6 +185,6 @@
 
   <script src="assets/js/data.js?v=20260808"></script>
   <script src="assets/js/i18n.js?v=20260808b"></script>
-  <script src="assets/js/app.js?v=20260820"></script>
+  <script src="assets/js/app.js?v=20260824"></script>
 </body>
 </html>

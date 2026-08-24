@@ -197,6 +197,9 @@ b, strong { font-weight: 700; }
 .family-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; font-weight: 600; font-size: 14px; color: var(--accent-ink); }
 .family-link::after { content: "→"; transition: transform .25s; }
 .family-card:hover .family-link::after { transform: translateX(4px); }
+/* 系列卡片改为整卡可点击链接（跳转系列详情页） */
+.family-card { color: inherit; text-decoration: none; cursor: pointer; }
+.family-card:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 
 /* ---------- FILTERS ---------- */
 .filters { display: flex; gap: 26px; flex-wrap: wrap; margin-bottom: 30px; }
@@ -611,4 +614,33 @@ input[type=range] { width: 100%; margin: 22px 0 6px; accent-color: var(--accent)
   .pd-card { grid-template-columns: 1fr; }
   .pd-media { min-height: 200px; }
   .detail-page { padding: 24px 16px 48px; }
+}
+
+/* ---------- 系列详情页（机型列表） ---------- */
+.pd-info .meta-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 6px 0 14px; align-items: center; }
+.pd-section-hint { color: var(--ink-faint); font-size: 13.5px; margin: -4px 0 18px; }
+.series-variants { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+.series-variant {
+  display: flex; gap: 16px; align-items: center; text-decoration: none; color: inherit;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 14px; box-shadow: var(--shadow-sm); transition: transform .3s, box-shadow .3s, border-color .3s; cursor: pointer;
+}
+.series-variant:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: #cfe0f5; }
+.series-variant:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.sv-media {
+  width: 96px; height: 96px; flex: 0 0 96px; border-radius: var(--radius-sm);
+  background: #f4f8fc; display: grid; place-items: center; overflow: hidden;
+}
+.sv-media img { max-height: 84px; object-fit: contain; transition: transform .4s; }
+.series-variant:hover .sv-media img { transform: scale(1.06); }
+.sv-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.sv-name { font-family: var(--font-display); font-size: 15px; font-weight: 600; line-height: 1.3; }
+.sv-meta { font-size: 12.5px; color: var(--ink-soft); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.sv-price { font-family: var(--font-display); font-weight: 700; font-size: 17px; color: var(--accent-ink); }
+.sv-price small { font-size: 11.5px; color: var(--ink-faint); font-weight: 500; }
+.sv-go { margin-top: 2px; font-size: 13px; font-weight: 600; color: var(--accent); display: inline-flex; align-items: center; gap: 4px; }
+.sv-go::after { content: "→"; transition: transform .25s; }
+.series-variant:hover .sv-go::after { transform: translateX(4px); }
+@media (max-width: 620px) {
+  .series-variants { grid-template-columns: 1fr; }
 }

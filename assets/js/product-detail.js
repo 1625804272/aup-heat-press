@@ -38,7 +38,7 @@
     });
   }
 
-  var D = null, K3 = null, initDone = false;
+  var D = null, FAM = null, K3 = null, initDone = false;
 
   function specRowsFor(p) {
     var s = D.specs[p.family] || {};
@@ -55,11 +55,26 @@
     return rows;
   }
 
+  function revealObserve() {
+    if (!("IntersectionObserver" in window)) return;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    $$(".reveal:not(.in)").forEach(function (el) { io.observe(el); });
+  }
+
   function renderDetail() {
     var body = $("#pdBody");
     if (!body) return;
-    var p = (D.products || []).find(function (x) { return x.k3 === K3; });
-    if (!p) { body.innerHTML = '<p class="stock-empty">' + t("returns_no_data") + '</p>'; return; }
+    if (FAM && D.specs[FAM]) { renderSeries(FAM); return; }
+    if (K3) { renderVariant(K3); return; }
+    body.innerHTML = '<p class="stock-empty">' + t("detail_missing") + '</p>';
+  }
+
+  function renderVariant(k3) {
+    var body = $("#pdBody");
+    var p = (D.products || []).find(function (x) { return x.k3 === k3; });
+    if (!p) { body.innerHTML = '<p class="stock-empty">' + t("detail_missing") + '</p>'; return; }
 
     var im = imgFor(p);
     var tierKeys = Object.keys(p.tiers || {});
@@ -87,7 +102,7 @@
       : '<div class="pd-media-ph">' + p.family + '</div>';
 
     body.innerHTML =
-      '<a class="back-link" href="index.html#catalog" data-i18n="hero_btn_catalog">← 浏览全部机型</a>' +
+      '<a class="back-link" href="product-detail.html?family=' + encodeURIComponent(p.family) + '">← ' + familyName(p.family) + '</a>' +
       '<article class="pd-card reveal">' +
         '<div class="pd-media">' + media + '</div>' +
         '<div class="pd-info">' +
@@ -103,13 +118,64 @@
       '<section class="pd-section"><h2 data-i18n="modal_shipping_title">装箱与物流</h2><div class="table-wrap"><table class="spec-table"><tbody>' + shipping + '</tbody></table></div></section>';
 
     applyI18n();
-    if ("IntersectionObserver" in window && !initDone) {
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
-      }, { threshold: 0.12 });
-      $$(".reveal:not(.in)").forEach(function (el) { io.observe(el); });
-      initDone = true;
-    }
+    revealObserve();
+  }
+
+  function renderSeries(fam) {
+    var body = $("#pdBody");
+    var s = D.specs[fam] || {};
+    var m = D.familyMeta[fam] || { name: fam, tag: "" };
+    var variants = (D.products || []).filter(function (p) { return p.family === fam; });
+    var skuCount = variants.length;
+
+    var specRows = "";
+    D.attrOrder.forEach(function (a) {
+      var v = s[a.key];
+      if (v === undefined || v === null || v === "") return;
+      if (typeof v === "string" && v.indexOf("assets/") === 0) return;
+      if (a.key === "机器颜色") v = translateColorsInText(v);
+      if (a.key === "电源规格") v = translatePlugsInText(v);
+      v = specValue(v);
+      specRows += '<tr><th>' + specLabel(a.key) + '</th><td>' + v + '</td></tr>';
+    });
+
+    var media = s._image ? '<img src="' + s._image + '" alt="' + familyName(fam) + '">' : '<div class="pd-media-ph">' + fam + '</div>';
+
+    var chips = (familySize(fam) ? '<span class="chip">' + familySize(fam) + '</span>' : "") +
+      '<span class="chip">' + skuCount + ' ' + t("fam_model_unit") + '</span>' +
+      '<span class="chip">110/220V</span>';
+
+    var variantsHtml = variants.map(function (p) {
+      var im = imgFor(p);
+      return '<a class="series-variant" href="product-detail.html?k3=' + encodeURIComponent(p.k3) + '">' +
+        '<div class="sv-media">' + (im ? '<img src="' + im + '" alt="' + productName(p.name) + '">' : '<div class="pd-media-ph">' + fam + '</div>') + '</div>' +
+        '<div class="sv-body">' +
+          '<div class="sv-name">' + productName(p.name) + '</div>' +
+          '<div class="sv-meta">' + (p.voltage ? p.voltage + ' · ' : '') + colorDots(fam) + '</div>' +
+          '<div class="sv-price">' + yuan(p.basePrice) + '<small> /' + t("unit") + '</small></div>' +
+          '<span class="sv-go">' + t("fam_view_detail") + '</span>' +
+        '</div>' +
+      '</a>';
+    }).join("");
+
+    body.innerHTML =
+      '<a class="back-link" href="index.html#families">' + t("back_to_families") + '</a>' +
+      '<article class="pd-card reveal series-card">' +
+        '<div class="pd-media">' + media + '</div>' +
+        '<div class="pd-info">' +
+          '<h1 class="pd-name">' + familyName(fam) + '</h1>' +
+          '<div class="pd-sub">' + (m.tag || familyTag(fam)) + '</div>' +
+          '<div class="meta-row">' + chips + colorDots(fam) + '</div>' +
+        '</div>' +
+      '</article>' +
+      '<section class="pd-section"><h2 data-i18n="nav_specs">规格参数</h2><div class="table-wrap"><table class="spec-table"><tbody>' + (specRows ? specRows : '<tr><td>' + t("modal_no_spec") + '</td></tr>') + '</tbody></table></div></section>' +
+      '<section class="pd-section"><h2 data-i18n="series_models_title">机型列表</h2>' +
+        '<p class="pd-section-hint" data-i18n="series_models_hint">' + t("series_models_hint") + '</p>' +
+        '<div class="series-variants">' + variantsHtml + '</div>' +
+      '</section>';
+
+    applyI18n();
+    revealObserve();
   }
 
   function boot(data) {
@@ -123,6 +189,7 @@
 
   (async function () {
     var params = new URLSearchParams(location.search);
+    FAM = params.get("family");
     K3 = params.get("k3");
     try {
       var r = await fetch("/api/data", { cache: "no-store", credentials: "same-origin" });

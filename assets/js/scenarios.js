@@ -85,7 +85,7 @@
           '<div class="sc-chips"><span class="chip hot">' + m.size + '</span><span class="chip">110/220V</span>' + colorDots(fam) + '</div>' +
           '<a class="btn btn-primary" href="calc.html">' + t("nav_cta") + ' →</a>' +
         '</div>' +
-        '<div class="sc-hero-media"><img src="assets/img/' + IMG_KEY[fam] + '.png" alt="' + m.name + ' 应用场景"></div>' +
+        '<div class="sc-hero-media"><img src="assets/img/' + IMG_KEY[fam] + '.png?v=20260902" alt="' + m.name + ' 应用场景"></div>' +
       '</section>' +
       '<section class="sc-section">' +
         '<div class="section-head"><span class="kicker">APPLICATION SCENARIOS</span><h2>' + t("scenarios_title") + '</h2><p>' + t("scenarios_hint") + '</p></div>' +
